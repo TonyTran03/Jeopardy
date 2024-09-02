@@ -1,28 +1,40 @@
-.qSection {
-    background-color: gray;
+:root {
+    --lightblue: #A8CBD1;
+    --vanilla: #E1D7A2;
+    --coralpink: #E88E83;
+    --bittersweetshimmer: #BE534B;
+    --tiffany: #8EE0C9;
 }
-
+.qSection {
+    background-color: var(--tiffany);
+}
 .container {
     display: grid;
-    grid-template-columns: repeat(var(--cols), 1fr); 
-    grid-template-rows: repeat(var(--rows), 1fr); 
-    gap: 2px;
-    height: 100%; 
-    width: 100%; 
+    grid-template-columns: repeat(var(--cols), 1fr);
+    grid-template-rows: repeat(var(--rows), 1fr);
+    gap: 3px;
+    height: 100%; /* Ensure the grid takes up the full height of its container */
+    width: 100%;  /* Ensure the grid takes up the full width of its container */
+
 }
 
 .jeopardy-cell {
-    background-color: lightblue;
+  
     padding: 20px;
     text-align: center;
     border: 1px solid #000;
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100%; /* Ensure cells fill their grid area */
-    width: 100%; /* Ensure cells fill their grid area */
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
 }
 
+
+body {
+    background-color: var(--vanilla); /* Replace with your desired background color */
+  }
 .add-row, .add-col {
     margin-top: 10px;
     padding: 10px 20px;
