@@ -1,0 +1,37 @@
+.qSection {
+    background-color: gray;
+}
+
+.container {
+    display: grid;
+    grid-template-columns: repeat(var(--cols), 1fr); 
+    grid-template-rows: repeat(var(--rows), 1fr); 
+    gap: 2px;
+    height: 100%; 
+    width: 100%; 
+}
+
+.jeopardy-cell {
+    background-color: lightblue;
+    padding: 20px;
+    text-align: center;
+    border: 1px solid #000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%; /* Ensure cells fill their grid area */
+    width: 100%; /* Ensure cells fill their grid area */
+}
+
+.add-row, .add-col {
+    margin-top: 10px;
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+.add-row:hover, .add-col:hover {
+    background-color: #0056b3;
+}
