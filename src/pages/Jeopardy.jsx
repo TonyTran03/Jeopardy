@@ -3,6 +3,7 @@ import './jeopardy.css';
 import { useEffect, useState } from 'react';
 import { DndProvider, useDrag, useDrop } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
+import JeopardyForm from './JeopardyForm';
 
 const ItemTypes = {
   QUESTION: 'question',
@@ -51,7 +52,14 @@ function DroppableCell({ index, question, onDrop, points }) {
     <div
       ref={drop}
       className="jeopardy-cell"
-      style={{ backgroundColor, color: textColor, display: 'flex', justifyContent: 'center', alignItems: 'center', textAlign: 'center' }}
+      style={{
+        backgroundColor,
+        color: textColor,
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        textAlign: 'center',
+      }}
     >
       <div>
         <strong>Points: ${points}</strong>
@@ -70,31 +78,23 @@ export default function Jeopardy() {
   const [cols, setCols] = useState(5);
   const [initialized, setInitialized] = useState(false);
 
-
   useEffect(() => {
-    // Load rows, cols, and grid from URL parameters
     const url = new URL(window.location);
     const rowsParam = url.searchParams.get('rows');
     const colsParam = url.searchParams.get('cols');
     const gridParam = url.searchParams.get('grid');
 
-    if (rowsParam) {
-      setRows(parseInt(rowsParam, 10));
-    }
-    if (colsParam) {
-      setCols(parseInt(colsParam, 10));
-    }
+    if (rowsParam) setRows(parseInt(rowsParam, 10));
+    if (colsParam) setCols(parseInt(colsParam, 10));
     if (gridParam) {
       setGrid(gridParam.split(',').map((id) => (id ? decodeURIComponent(id) : null)));
     }
 
-    setInitialized(true); 
+    setInitialized(true);
   }, []);
 
-  // Grid needs to be created first
   useEffect(() => {
     if (initialized) {
-      // Fetch questions from the server after initialization
       fetch('http://localhost:5000/questions')
         .then((response) => response.json())
         .then((data) => setQuestions(data))
@@ -104,7 +104,6 @@ export default function Jeopardy() {
 
   useEffect(() => {
     if (initialized) {
-      // Synchronize the grid state with the URL
       const serializedGrid = serializeGrid(grid);
       const url = new URL(window.location);
       url.searchParams.set('grid', serializedGrid);
@@ -136,24 +135,23 @@ export default function Jeopardy() {
 
   const byeCols = () => {
     setCols((prevCols) => {
-      if (prevCols <= 1) return prevCols; 
-  
+      if (prevCols <= 1) return prevCols;
+
       const newCols = prevCols - 1;
-  
+
       setGrid((prevGrid) => {
         const newGrid = [];
         for (let i = 0; i < prevGrid.length; i += prevCols) {
-          const row = prevGrid.slice(i, i + prevCols); // Get the current row
-          row.pop(); // Remove the last column in the row
-          newGrid.push(...row); // Add the updated row back to the new grid
+          const row = prevGrid.slice(i, i + prevCols); 
+          row.pop(); 
+          newGrid.push(...row); 
         }
         return newGrid;
       });
-  
+
       return newCols;
     });
   };
-
 
   const addRow = () => {
     setRows((prevRows) => {
@@ -162,18 +160,14 @@ export default function Jeopardy() {
     });
   };
 
-
   const byeRow = () => {
     setRows((prevRows) => {
-      if (prevRows <= 1) return prevRows; 
-  
-      const newRows = prevRows - 1;
-  
-      setGrid((prevGrid) => {
+      if (prevRows <= 1) return prevRows;
 
-        return prevGrid.slice(0, newRows * cols);
-      });
-  
+      const newRows = prevRows - 1;
+
+      setGrid((prevGrid) => prevGrid.slice(0, newRows * cols));
+
       return newRows;
     });
   };
@@ -181,11 +175,38 @@ export default function Jeopardy() {
   const calculatePoints = (rowIndex) => {
     return 200 * (rowIndex + 1);
   };
-
   const handleDrop = (item, index) => {
-    const newGrid = [...grid];
-    newGrid[index] = item.question._id; // Store the question ID in the grid
-    setGrid(newGrid);
+    setGrid((prevGrid) => {
+        const newGrid = [...prevGrid];
+        newGrid[index] = item.question._id; // Store the question ID in the grid
+
+        // Serialize the grid and update the URL
+        const serializedGrid = serializeGrid(newGrid);
+        const url = new URL(window.location);
+        url.searchParams.set('grid', serializedGrid);
+        url.searchParams.set('rows', rows);
+        url.searchParams.set('cols', cols);
+        window.history.pushState(null, '', url.toString());
+
+        return newGrid;
+    });
+};
+
+  const handleNewQuestion = (newQuestion) => {
+    fetch('http://localhost:5000/questions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(newQuestion),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        setQuestions((prevQuestions) => [...prevQuestions, data]);
+      })
+      .catch((error) => {
+        console.error('Error:', error);
+      });
   };
 
   return (
@@ -200,10 +221,10 @@ export default function Jeopardy() {
           </button>
 
           <button className="add-col" onClick={byeRow}>
-            bye Row
+            Bye Row
           </button>
           <button className="add-col" onClick={byeCols}>
-            bye Column
+            Bye Column
           </button>
 
           <Typography variant="h1" sx={{ fontSize: '2rem' }}>
@@ -222,20 +243,21 @@ export default function Jeopardy() {
             JEOPARDY
           </Typography>
 
-          <div className="container"
+          <div
+            className="container"
             style={{
               '--cols': cols,
               '--rows': rows,
               gridTemplateColumns: `repeat(${cols}, 1fr)`,
-              gridTemplateRows: `repeat(${rows}, 1fr)`
-            }}>
+              gridTemplateRows: `repeat(${rows}, 1fr)`,
+            }}
+          >
             {Array.from({ length: rows * cols }).map((_, index) => {
               const rowIndex = Math.floor(index / cols);
               const points = calculatePoints(rowIndex);
               const questionId = grid[index];
 
-              // Find the question in the list of questions using the stored ID
-              const question = questions.find(q => q._id === questionId);
+              const question = questions.find((q) => q._id === questionId);
 
               return (
                 <DroppableCell
@@ -248,6 +270,7 @@ export default function Jeopardy() {
               );
             })}
           </div>
+          <JeopardyForm onSubmit={handleNewQuestion} />
         </div>
       </div>
     </DndProvider>

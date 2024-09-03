@@ -50,7 +50,11 @@ app.post(`${apiPrefix}/questions`, async (req, res) => {
   try {
     const newQuestion = req.body;
     const result = await collection.insertOne(newQuestion);
-    res.status(201).json(result.ops[0]); // Send back the created question
+    
+    // Fetch the newly inserted document by its ID
+    const createdQuestion = await collection.findOne({ _id: result.insertedId });
+
+    res.status(201).json(createdQuestion);
   } catch (err) {
     console.error('Error creating question:', err);
     res.status(500).send('Internal Server Error');
