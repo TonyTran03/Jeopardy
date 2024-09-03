@@ -134,10 +134,47 @@ export default function Jeopardy() {
     });
   };
 
+  const byeCols = () => {
+    setCols((prevCols) => {
+      if (prevCols <= 1) return prevCols; 
+  
+      const newCols = prevCols - 1;
+  
+      setGrid((prevGrid) => {
+        const newGrid = [];
+        for (let i = 0; i < prevGrid.length; i += prevCols) {
+          const row = prevGrid.slice(i, i + prevCols); // Get the current row
+          row.pop(); // Remove the last column in the row
+          newGrid.push(...row); // Add the updated row back to the new grid
+        }
+        return newGrid;
+      });
+  
+      return newCols;
+    });
+  };
+
+
   const addRow = () => {
     setRows((prevRows) => {
       setGrid((prevGrid) => [...prevGrid, ...Array(cols).fill(null)]);
       return prevRows + 1;
+    });
+  };
+
+
+  const byeRow = () => {
+    setRows((prevRows) => {
+      if (prevRows <= 1) return prevRows; 
+  
+      const newRows = prevRows - 1;
+  
+      setGrid((prevGrid) => {
+
+        return prevGrid.slice(0, newRows * cols);
+      });
+  
+      return newRows;
     });
   };
 
@@ -161,6 +198,14 @@ export default function Jeopardy() {
           <button className="add-col" onClick={addCols}>
             Add Column
           </button>
+
+          <button className="add-col" onClick={byeRow}>
+            bye Row
+          </button>
+          <button className="add-col" onClick={byeCols}>
+            bye Column
+          </button>
+
           <Typography variant="h1" sx={{ fontSize: '2rem' }}>
             Questions are here
           </Typography>
