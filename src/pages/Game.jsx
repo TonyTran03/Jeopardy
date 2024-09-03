@@ -13,6 +13,7 @@ export default function JeopardyGame() {
   const [rows, setRows] = useState(5);
   const [cols, setCols] = useState(5);
   const [columnNames, setColumnNames] = useState([]);
+  const [lobbyCode, setLobbyCode] = useState(''); // Add state for lobbyCode
   const [questions, setQuestions] = useState([]); 
   const [selectedQuestion, setSelectedQuestion] = useState(null);
   const [selectedColumn, setSelectedColumn] = useState(null);
@@ -35,6 +36,7 @@ export default function JeopardyGame() {
     const rowsParam = query.get('rows');
     const colsParam = query.get('cols');
     const columnNamesParam = query.get('columnNames');
+    const lobbyCodeParam = query.get('lobbyCode'); // Get the lobbyCode
 
     if (rowsParam) setRows(parseInt(rowsParam, 10));
     if (colsParam) setCols(parseInt(colsParam, 10));
@@ -43,6 +45,9 @@ export default function JeopardyGame() {
     }
     if (columnNamesParam) {
       setColumnNames(columnNamesParam.split(',').map(name => decodeURIComponent(name)));
+    }
+    if (lobbyCodeParam) {
+      setLobbyCode(lobbyCodeParam); // Set the lobbyCode state
     }
   }, []);  // Empty dependency array to only run on mount
 

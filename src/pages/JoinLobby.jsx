@@ -3,50 +3,48 @@ import { useNavigate } from 'react-router-dom';
 
 export default function JoinLobby() {
   const [sessionCode, setSessionCode] = useState('');
-  const [sessionFound, setSessionFound] = useState(false);
+  const [playerName, setPlayerName] = useState('');
+  const [players, setPlayers] = useState([]);
   const navigate = useNavigate();
 
-  const handleSessionCodeChange = (e) => {
-    setSessionCode(e.target.value);
-  };
-
-  const handleJoinGame = async () => {
+  const handleJoinSession = async () => {
     try {
-      const response = await fetch(`http://localhost:5000/sessions/${sessionCode}`);
-      if (response.ok) {
-        setSessionFound(true);
-        const gameURL = `/game?lobbyCode=${sessionCode}`;
-        navigate(gameURL);
-      } else {
-        setSessionFound(false);
-        console.error('Session not found');
-      }
+      const response = await fetch(`http://localhost:5000/sessions/${sessionCode}/join`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ playerName }),
+      });
+      const data = await response.json();
+      setPlayers(data.players);
+      console.log('Joined session:', sessionCode);
+      navigate(`/lobby/${sessionCode}`);
     } catch (error) {
-      setSessionFound(false);
       console.error('Error joining session:', error);
     }
   };
 
   return (
-    <div className="join-game-container">
-      <div>
-        <input
-          type="text"
-          placeholder="Session Code"
-          value={sessionCode}
-          onChange={handleSessionCodeChange}
-          onBlur={handleJoinGame} // Check session code when input loses focus
-        />
-        {sessionFound ? (
-          <div className="session-found">✔️ Session found.</div>
-        ) : (
-          <div className="session-not-found">❌ Session not found.</div>
-        )}
-      </div>
-
-      <button onClick={handleJoinGame} disabled={!sessionFound}>
-        Join Game
-      </button>
+    <div>
+      <input
+        type="text"
+        placeholder="Enter Session Code"
+        value={sessionCode}
+        onChange={(e) => setSessionCode(e.target.value)}
+      />
+      <input
+        type="text"
+        placeholder="Enter Your Name"
+        value={playerName}
+        onChange={(e) => setPlayerName(e.target.value)}
+      />
+      <button onClick={handleJoinSession}>Join Game</button>
+      <ul>
+        {players.map((player, index) => (
+          <li key={index}>{player}</li>
+        ))}
+      </ul>
     </div>
   );
 }

@@ -17,27 +17,39 @@ export default function Home() {
       .catch((error) => console.error('Error fetching boards:', error));
   }, []);
 
-
-
   const handleStartGame = async () => {
     if (selectedBoard) {
       try {
+        // Fetch the board details from MongoDB
+        const boardResponse = await fetch(`http://localhost:5000/boards/${selectedBoard._id}`);
+        if (!boardResponse.ok) {
+          console.error('Failed to fetch board details');
+          return;
+        }
+  
+        const boardData = await boardResponse.json();
+  
+        // Create a new session
         const sessionCreationResponse = await fetch('http://localhost:5000/sessions', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ code: sessionCode }), // Send the session code
         });
   
         if (sessionCreationResponse.ok) {
-          const gameURL = `/game?boardId=${selectedBoard._id}&lobbyCode=${sessionCode}`;
+          const { sessionCode } = await sessionCreationResponse.json(); // Get the session code from the response
+  
+          // Construct the full game URL using the board's URL and append the lobby code
+          const gameURL = `${boardData.url}&lobbyCode=${sessionCode}`;
+  
+          // Navigate to the game with the constructed URL
           navigate(gameURL);
         } else {
           console.error('Failed to create session');
         }
       } catch (error) {
-        console.error('Error during session creation:', error);
+        console.error('Error during session creation or board retrieval:', error);
       }
     }
   };

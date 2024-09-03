@@ -76,6 +76,7 @@ app.post(`${apiPrefix}/questions`, async (req, res) => {
   }
 });
 
+
 // GET /boards - Retrieve all boards
 app.get('/boards', async (req, res) => {
   try {
@@ -108,38 +109,6 @@ app.post('/boards', async (req, res) => {
     res.status(500).send('Internal Server Error');
   }
 });
-
-// POST /sessions - Create or update a session
-app.post('/sessions', (req, res) => {
-  const { code } = req.body;
-
-  if (!code) {
-    return res.status(400).json({ message: 'Session code is required' });
-  }
-
-  // If session does not exist, create it
-  if (!sessions[code]) {
-    sessions[code] = {};
-    console.log(`Session created with code: ${code}`);
-  } else {
-    console.log(`Session already exists with code: ${code}`);
-  }
-
-  res.status(200).json({ message: 'Session created or updated successfully', session: sessions[code] });
-});
-
-// GET /sessions/:code - Check if session exists
-app.get('/sessions/:code', (req, res) => {
-  const sessionCode = req.params.code;
-  const session = sessions[sessionCode];
-
-  if (session) {
-    res.status(200).json({ exists: true });
-  } else {
-    res.status(404).json({ exists: false });
-  }
-});
-
 // GET /boards/:id - Retrieve a specific board by ID
 app.get('/boards/:id', async (req, res) => {
   try {
@@ -153,4 +122,63 @@ app.get('/boards/:id', async (req, res) => {
     console.error('Error fetching board:', err);
     res.status(500).send('Internal Server Error');
   }
+});
+
+
+app.post('/sessions', (req, res) => {
+  const sessionCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+
+  if (!sessions[sessionCode]) {
+    sessions[sessionCode] = {
+      players: [],  // List of players in the session
+      gameStarted: false,
+      // Add any other session-specific data here
+    };
+    console.log(`Session created with code: ${sessionCode}`);
+    res.status(201).json({ sessionCode });
+  } else {
+    res.status(409).json({ message: 'Session already exists' });
+  }
+});
+
+// POST /sessions/:code/join - Join a session
+app.post('/sessions/:code/join', (req, res) => {
+  const sessionCode = req.params.code;
+  const { playerName } = req.body;
+
+  if (!sessions[sessionCode]) {
+    return res.status(404).json({ message: 'Session not found' });
+  }
+
+  if (sessions[sessionCode].gameStarted) {
+    return res.status(400).json({ message: 'Game has already started' });
+  }
+
+  sessions[sessionCode].players.push(playerName);
+  console.log(`${playerName} joined session ${sessionCode}`);
+  res.status(200).json({ message: 'Joined session successfully', players: sessions[sessionCode].players });
+});
+
+// POST /sessions/:code/start - Start the game
+app.post('/sessions/:code/start', (req, res) => {
+  const sessionCode = req.params.code;
+
+  if (!sessions[sessionCode]) {
+    return res.status(404).json({ message: 'Session not found' });
+  }
+
+  sessions[sessionCode].gameStarted = true;
+  console.log(`Game started for session ${sessionCode}`);
+  res.status(200).json({ message: 'Game started' });
+});
+
+// GET /sessions/:code - Get session details
+app.get('/sessions/:code', (req, res) => {
+  const sessionCode = req.params.code;
+
+  if (!sessions[sessionCode]) {
+    return res.status(404).json({ message: 'Session not found' });
+  }
+
+  res.status(200).json(sessions[sessionCode]);
 });
