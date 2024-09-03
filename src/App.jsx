@@ -5,18 +5,18 @@ import './App.css'
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Home from './pages/Home';
 
-import Jeopardy from './pages/jeopardy';
+import Jeopardy from './pages/Jeopardy';
 import JeopardyGame from './pages/Game';
 
 function App() {
-  const [count, setCount] = useState(0)
+
 
   return (
     <>
     <BrowserRouter>
       <Routes>
         <Route index element={<Home/>}/>
-        <Route path="Jeopardy" element={<Jeopardy/>}/>
+        <Route path="/Jeopardy" element={<Jeopardy/>}/>
         <Route path="/game" element={<JeopardyGame/>} />
       </Routes>
     </BrowserRouter>

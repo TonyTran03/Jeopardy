@@ -69,7 +69,7 @@ export default function JeopardyGame() {
               <Typography variant='h2'>
                 ${points}
             </Typography>
-              {/* <div>Question ID: {questionId}</div> */}
+              <div>Question ID: {questionId}</div>
             </div>
           );
         })}
