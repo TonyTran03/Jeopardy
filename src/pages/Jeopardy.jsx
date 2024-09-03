@@ -4,6 +4,11 @@ import { useEffect, useState } from 'react';
 import { DndProvider, useDrag, useDrop } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import JeopardyForm from './JeopardyForm';
+import { useNavigate, useLocation } from 'react-router-dom';
+
+function useQuery() {
+  return new URLSearchParams(useLocation().search);
+}
 
 const ItemTypes = {
   QUESTION: 'question',
@@ -67,6 +72,22 @@ function DroppableCell({ index, question, onDrop, points }) {
       <div>
         <strong>{question ? question.question : 'No question'}</strong>
       </div>
+      <strong>
+        {question ? (
+          <>
+            {question.answer.text && <div>{question.answer.text}</div>}
+            {question.answer.image && (
+              <img
+                src={question.answer.image} // Ensure this is a valid image URL
+                alt="Answer"
+                style={{ maxWidth: '100%', maxHeight: '100px' }}
+              />
+            )}
+          </>
+        ) : (
+          'No answer'
+        )}
+      </strong>
     </div>
   );
 }
@@ -76,22 +97,30 @@ export default function Jeopardy() {
   const [grid, setGrid] = useState([]);
   const [rows, setRows] = useState(5);
   const [cols, setCols] = useState(5);
+  const [columnNames, setColumnNames] = useState([]); 
   const [initialized, setInitialized] = useState(false);
+  const [isGridFilled, setIsGridFilled] = useState(false); 
+
+  const query = useQuery();
+  const navigate = useNavigate(); 
 
   useEffect(() => {
-    const url = new URL(window.location);
-    const rowsParam = url.searchParams.get('rows');
-    const colsParam = url.searchParams.get('cols');
-    const gridParam = url.searchParams.get('grid');
-
+    const rowsParam = query.get('rows');
+    const colsParam = query.get('cols');
+    const gridParam = query.get('grid');
+    const columnNamesParam = query.get('columnNames');
+    
     if (rowsParam) setRows(parseInt(rowsParam, 10));
     if (colsParam) setCols(parseInt(colsParam, 10));
     if (gridParam) {
       setGrid(gridParam.split(',').map((id) => (id ? decodeURIComponent(id) : null)));
+    }    
+    if (columnNamesParam) {
+      setColumnNames(columnNamesParam.split(',').map(name => decodeURIComponent(name)));
     }
 
     setInitialized(true);
-  }, []);
+  }, []); // Empty dependency array ensures this only runs on mount
 
   useEffect(() => {
     if (initialized) {
@@ -105,16 +134,32 @@ export default function Jeopardy() {
   useEffect(() => {
     if (initialized) {
       const serializedGrid = serializeGrid(grid);
-      const url = new URL(window.location);
-      url.searchParams.set('grid', serializedGrid);
-      url.searchParams.set('rows', rows);
-      url.searchParams.set('cols', cols);
-      window.history.pushState(null, '', url.toString());
+      const allCellsFilled = grid.every(cell => cell !== null);
+      const serializedColumnNames = serializeColumnNames(columnNames);
+      if (allCellsFilled) {
+        setIsGridFilled(true);
+      } else {
+        setIsGridFilled(false);
+      }
+
+      // Update the URL based on the grid state
+      navigate(`?grid=${serializedGrid}&rows=${rows}&cols=${cols}&columnNames=${serializedColumnNames}`, { replace: true });
     }
-  }, [rows, cols, grid, initialized]);
+  }, [grid, rows, cols,columnNames, initialized]);
 
   const serializeGrid = (grid) => {
     return grid.map((item) => (item ? encodeURIComponent(item) : '')).join(',');
+  };
+  const serializeColumnNames = (columnNames) => {
+    return columnNames.map(name => encodeURIComponent(name)).join(',');
+  };
+  
+  const handleColumnNameChange = (index, value) => {
+    setColumnNames(prevNames => {
+      const newNames = [...prevNames];
+      newNames[index] = value;
+      return newNames;
+    });
   };
 
   const addCols = () => {
@@ -175,22 +220,14 @@ export default function Jeopardy() {
   const calculatePoints = (rowIndex) => {
     return 200 * (rowIndex + 1);
   };
+  
   const handleDrop = (item, index) => {
     setGrid((prevGrid) => {
         const newGrid = [...prevGrid];
         newGrid[index] = item.question._id; // Store the question ID in the grid
-
-        // Serialize the grid and update the URL
-        const serializedGrid = serializeGrid(newGrid);
-        const url = new URL(window.location);
-        url.searchParams.set('grid', serializedGrid);
-        url.searchParams.set('rows', rows);
-        url.searchParams.set('cols', cols);
-        window.history.pushState(null, '', url.toString());
-
         return newGrid;
     });
-};
+  };
 
   const handleNewQuestion = (newQuestion) => {
     fetch('http://localhost:5000/questions', {
@@ -209,7 +246,13 @@ export default function Jeopardy() {
       });
   };
 
-  return (
+  const handlePlayGame = () => {
+    const serializedGrid = serializeGrid(grid);
+    const serializedColumnNames = serializeColumnNames(columnNames); // Serialize column names here
+    navigate(`/game?grid=${serializedGrid}&rows=${rows}&cols=${cols}&columnNames=${serializedColumnNames}`);
+  };
+
+    return (
     <DndProvider backend={HTML5Backend}>
       <div className="flex h-screen w-screen">
         <div className="flex flex-col flex-1 qSection">
@@ -236,6 +279,15 @@ export default function Jeopardy() {
               <DraggableQuestion key={index} question={question} index={index} />
             ))}
           </div>
+
+          <div className='flex items-end flex-1'>
+            <JeopardyForm onSubmit={handleNewQuestion} />
+            {isGridFilled && (
+              <button className="play-button" onClick={handlePlayGame}>
+                Play
+              </button>
+            )}
+          </div>
         </div>
 
         <div className="flex flex-col w-5/6 justify-center items-center">
@@ -247,16 +299,28 @@ export default function Jeopardy() {
             className="container"
             style={{
               '--cols': cols,
-              '--rows': rows,
+              '--rows': rows + 1, // +1 to accommodate the column name row
               gridTemplateColumns: `repeat(${cols}, 1fr)`,
-              gridTemplateRows: `repeat(${rows}, 1fr)`,
+              gridTemplateRows: `auto repeat(${rows}, 1fr)`, // 'auto' for the column name row
             }}
           >
+            {/* Column Names Row */}
+            {Array.from({ length: cols }).map((_, index) => (
+              <input
+                key={index}
+                type="text"
+                className="column-name-input"
+                value={columnNames[index] || ''}
+                onChange={(e) => handleColumnNameChange(index, e.target.value)}
+                placeholder={`Column ${index + 1}`}
+              />
+            ))}
+
+            {/* Jeopardy Grid */}
             {Array.from({ length: rows * cols }).map((_, index) => {
               const rowIndex = Math.floor(index / cols);
               const points = calculatePoints(rowIndex);
               const questionId = grid[index];
-
               const question = questions.find((q) => q._id === questionId);
 
               return (
@@ -270,7 +334,6 @@ export default function Jeopardy() {
               );
             })}
           </div>
-          <JeopardyForm onSubmit={handleNewQuestion} />
         </div>
       </div>
     </DndProvider>

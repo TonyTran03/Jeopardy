@@ -19,7 +19,6 @@
 }
 
 .jeopardy-cell {
-  
     padding: 20px;
     text-align: center;
     border: 1px solid #000;
@@ -47,3 +46,11 @@ body {
 .add-row:hover, .add-col:hover {
     background-color: #0056b3;
 }
+.column-name-input {
+    text-align: center;
+    padding: 10px;
+    border: 1px solid #000;
+    background-color: var(--lightblue);
+    color: white;
+    font-weight: bold;
+  }

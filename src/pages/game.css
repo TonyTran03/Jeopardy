@@ -1,0 +1,33 @@
+:root {
+    --lightblue: #A8CBD1;
+    --vanilla: #E1D7A2;
+    --coralpink: #E88E83;
+    --bittersweetshimmer: #BE534B;
+    --tiffany: #8EE0C9;
+}
+.containers {
+    display: grid;
+    grid-template-columns: repeat(var(--cols), 1fr);
+    gap: 4px;
+    height: 100%;
+    width: 100%;
+    margin: 2rem;
+    background-color: transparent;
+}
+
+.jeopardy-cells {
+    padding: 20px;
+    text-align: center;
+    border: 1px solid #000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    background-color: var(--tiffany); /* Example */
+}
+
+.column-names {
+    font-weight: bold;
+    background-color: var(--tiffany);
+    color: white;
+}

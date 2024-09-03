@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Home from './pages/Home';
 
 import Jeopardy from './pages/jeopardy';
+import JeopardyGame from './pages/Game';
 
 function App() {
   const [count, setCount] = useState(0)
@@ -16,6 +17,7 @@ function App() {
       <Routes>
         <Route index element={<Home/>}/>
         <Route path="Jeopardy" element={<Jeopardy/>}/>
+        <Route path="/game" element={<JeopardyGame/>} />
       </Routes>
     </BrowserRouter>
     </>

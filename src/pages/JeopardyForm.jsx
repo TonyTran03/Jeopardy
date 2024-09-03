@@ -3,8 +3,22 @@ import React, { useState } from 'react';
 export default function JeopardyForm({ onSubmit }) {
   const [questionText, setQuestionText] = useState('');
   const [category, setCategory] = useState('');
-  const [answer, setAnswer] = useState('');
+  const [answerText, setAnswerText] = useState('');
+  const [answerImageBase64, setAnswerImageBase64] = useState('');
   const [points, setPoints] = useState(100);
+
+  const handleImageUpload = (event) => {
+    const file = event.target.files[0];
+    const reader = new FileReader();
+
+    reader.onloadend = () => {
+      setAnswerImageBase64(reader.result);
+    };
+
+    if (file) {
+      reader.readAsDataURL(file);
+    }
+  };
 
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -12,7 +26,10 @@ export default function JeopardyForm({ onSubmit }) {
     const newQuestion = {
       question: questionText,
       category: category,
-      answer: answer,
+      answer: {
+        text: answerText,
+        image: answerImageBase64,  // Store the base64 image string
+      },
       points: points,
     };
 
@@ -22,8 +39,8 @@ export default function JeopardyForm({ onSubmit }) {
     // Reset form fields
     setQuestionText('');
     setCategory('');
-    setAnswer('');
-    setPoints(100);
+    setAnswerText('');
+    setAnswerImageBase64('');
   };
 
   return (
@@ -34,6 +51,7 @@ export default function JeopardyForm({ onSubmit }) {
           type="text"
           value={questionText}
           onChange={(e) => setQuestionText(e.target.value)}
+          className="text-black bg-gray-200 border border-gray-400 focus:outline-none focus:border-blue-500"
         />
       </div>
       <div>
@@ -42,22 +60,24 @@ export default function JeopardyForm({ onSubmit }) {
           type="text"
           value={category}
           onChange={(e) => setCategory(e.target.value)}
+          className="text-black bg-gray-200 border border-gray-400 focus:outline-none focus:border-blue-500"
         />
       </div>
       <div>
-        <label>Answer:</label>
+        <label>Answer (Text):</label>
         <input
           type="text"
-          value={answer}
-          onChange={(e) => setAnswer(e.target.value)}
+          value={answerText}
+          onChange={(e) => setAnswerText(e.target.value)}
+          className="text-black bg-gray-200 border border-gray-400 focus:outline-none focus:border-blue-500"
         />
       </div>
       <div>
-        <label>Points:</label>
+        <label>Answer (Image):</label>
         <input
-          type="number"
-          value={points}
-          onChange={(e) => setPoints(Number(e.target.value))}
+          type="file"
+          onChange={handleImageUpload}
+          className="text-black bg-gray-200 border border-gray-400 focus:outline-none focus:border-blue-500"
         />
       </div>
       <button type="submit">Create Question</button>
