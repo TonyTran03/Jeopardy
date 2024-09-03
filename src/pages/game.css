@@ -1,33 +1,38 @@
-:root {
-    --lightblue: #A8CBD1;
-    --vanilla: #E1D7A2;
-    --coralpink: #E88E83;
-    --bittersweetshimmer: #BE534B;
-    --tiffany: #8EE0C9;
-}
-.containers {
+/* General Gameboard Styling */
+body {
+    background-color: #001f3f; /* Jeopardy-style deep blue */
+    color: #fff;
+    margin: 0; /* Remove default margin */
+    padding: 0; /* Remove default padding */
+  }
+  
+  .containers {
+    width: 100vw; /* Take full viewport width */
+    height: 100vh; /* Take full viewport height */
     display: grid;
-    grid-template-columns: repeat(var(--cols), 1fr);
-    gap: 4px;
-    height: 100%;
-    width: 100%;
-    margin: 2rem;
-    background-color: transparent;
-}
-
-.jeopardy-cells {
-    padding: 20px;
-    text-align: center;
-    border: 1px solid #000;
+    grid-template-columns: repeat(var(--columns), 1fr); /* Dynamic columns */
+    grid-template-rows: auto repeat(var(--rows), 1fr); /* Dynamic rows */
+  }
+  
+  .jeopardy-cells {
     display: flex;
-    justify-content: center;
     align-items: center;
-    flex-direction: column;
-    background-color: var(--tiffany); /* Example */
-}
-
-.column-names {
+    justify-content: center;
+    border: 2px solid #004080;
+    background-color: #007bff;
+    color: #FFD700; /* Gold color for text */
     font-weight: bold;
-    background-color: var(--tiffany);
-    color: white;
-}
+    font-size: 2rem; /* Adjust font size */
+    text-shadow: 2px 2px 4px #000; /* Text shadow for depth */
+    transition: all 0.3s ease-in-out;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Box shadow for 3D effect */
+    cursor: pointer;
+  }
+  
+  .column-names {
+    background-color: #002f6c;
+    color: #FFD700;
+    font-weight: bold;
+    text-align: center;
+  }
+  

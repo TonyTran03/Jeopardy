@@ -5,8 +5,9 @@ import './App.css'
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Home from './pages/Home';
 
-import Jeopardy from './pages/Jeopardy';
+import Create from './pages/Create';
 import JeopardyGame from './pages/Game';
+import JoinLobby from './pages/JoinLobby';
 
 function App() {
 
@@ -16,8 +17,9 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route index element={<Home/>}/>
-        <Route path="/Jeopardy" element={<Jeopardy/>}/>
+        <Route path="/create" element={<Create/>}/>
         <Route path="/game" element={<JeopardyGame/>} />
+        <Route path="/join" element={<JoinLobby/>} />
       </Routes>
     </BrowserRouter>
     </>
