@@ -1,5 +1,5 @@
 import express from 'express';
-import { MongoClient, ObjectId } from 'mongodb'; // Import ObjectId for fetching by ID
+import { MongoClient, ObjectId } from 'mongodb';
 import dotenv from 'dotenv';
 import cors from 'cors';
 
@@ -12,7 +12,10 @@ const uri = process.env.MONGO_URI;
 
 let client;
 let collection;
-let boardsCollection; // New variable for the "boards" collection
+let boardsCollection;
+
+// In-memory storage for sessions
+const sessions = {};
 
 async function connectToMongoDB() {
   try {
@@ -22,7 +25,7 @@ async function connectToMongoDB() {
 
     const database = client.db("jeopardy");
     collection = database.collection("questions");
-    boardsCollection = database.collection("boards"); // Initialize the "boards" collection
+    boardsCollection = database.collection("boards");
 
     // Start the server only after the database connection is established
     app.listen(port, () => {
@@ -31,15 +34,13 @@ async function connectToMongoDB() {
 
   } catch (err) {
     console.error("Failed to connect to MongoDB", err);
-    process.exit(1); // Exit the application if the connection fails
+    process.exit(1);
   }
 }
 
 connectToMongoDB();
 
 app.use(cors());
-
-// Middleware 
 app.use(express.json());
 
 // GET /questions - Retrieve all questions
@@ -82,7 +83,7 @@ app.get('/boards', async (req, res) => {
       throw new Error('Boards collection not initialized');
     }
 
-    const boards = await boardsCollection.find({}).toArray(); // Fetch all game boards
+    const boards = await boardsCollection.find({}).toArray();
     res.json(boards);
   } catch (err) {
     console.error('Error fetching boards:', err);
@@ -97,7 +98,7 @@ app.post('/boards', async (req, res) => {
       throw new Error('Boards collection not initialized');
     }
 
-    const newBoard = req.body; // This will contain the serialized URL and name
+    const newBoard = req.body;
     const result = await boardsCollection.insertOne(newBoard);
     
     const createdBoard = await boardsCollection.findOne({ _id: result.insertedId });
@@ -105,6 +106,37 @@ app.post('/boards', async (req, res) => {
   } catch (err) {
     console.error('Error saving board:', err);
     res.status(500).send('Internal Server Error');
+  }
+});
+
+// POST /sessions - Create or update a session
+app.post('/sessions', (req, res) => {
+  const { code } = req.body;
+
+  if (!code) {
+    return res.status(400).json({ message: 'Session code is required' });
+  }
+
+  // If session does not exist, create it
+  if (!sessions[code]) {
+    sessions[code] = {};
+    console.log(`Session created with code: ${code}`);
+  } else {
+    console.log(`Session already exists with code: ${code}`);
+  }
+
+  res.status(200).json({ message: 'Session created or updated successfully', session: sessions[code] });
+});
+
+// GET /sessions/:code - Check if session exists
+app.get('/sessions/:code', (req, res) => {
+  const sessionCode = req.params.code;
+  const session = sessions[sessionCode];
+
+  if (session) {
+    res.status(200).json({ exists: true });
+  } else {
+    res.status(404).json({ exists: false });
   }
 });
 

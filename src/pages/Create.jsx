@@ -4,7 +4,7 @@ import { DndProvider, useDrag, useDrop } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import JeopardyForm from './JeopardyForm';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Typography } from '@mui/material';
+import { Typography, TextField } from '@mui/material';
 
 function useQuery() {
   return new URLSearchParams(useLocation().search);
@@ -110,6 +110,7 @@ export default function Create() {
   const [columnNames, setColumnNames] = useState([]); 
   const [initialized, setInitialized] = useState(false);
   const [isGridFilled, setIsGridFilled] = useState(false); 
+  const [boardName, setBoardName] = useState(''); // New state for board name
 
   const query = useQuery();
   const navigate = useNavigate(); 
@@ -255,39 +256,45 @@ export default function Create() {
       });
   };
 
-  // const handlePlayGame = () => {
-  //   const serializedGrid = serializeGrid(grid);
-  //   const serializedColumnNames = serializeColumnNames(columnNames);
-  //   navigate(`/game?grid=${serializedGrid}&rows=${rows}&cols=${cols}&columnNames=${serializedColumnNames}`);
-  // };
-  const handleSaveBoard = () => {
+  const handleSaveBoard = async () => {
     const serializedGrid = serializeGrid(grid);
     const serializedColumnNames = serializeColumnNames(columnNames);
-    
-    const boardURL = `/game?grid=${serializedGrid}&rows=${rows}&cols=${cols}&columnNames=${serializedColumnNames}`;
   
+    const boardURL = `/game?grid=${serializedGrid}&rows=${rows}&cols=${cols}&columnNames=${serializedColumnNames}`;
+    
     const boardData = {
       url: boardURL,
-      name: `Board - ${new Date().toLocaleString()}`, // Example: Add a name or title for the board
+      name: `${boardName || 'Board'} - ${new Date().toLocaleString()}`, // Include date in the name
     };
   
-    fetch('http://localhost:5000/boards', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(boardData),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        console.log('Board saved:', data);
-        // Optional: Navigate or give feedback on successful save
-      })
-      .catch((error) => {
-        console.error('Error saving board:', error);
-      });
-  };
+    try {
+      // Check if a board with the same URL already exists
+      const response = await fetch('http://localhost:5000/boards');
+      const boards = await response.json();
+      const duplicateBoard = boards.find(board => board.url === boardData.url);
   
+      if (duplicateBoard) {
+        alert('A board with the same configuration already exists.');
+        return; 
+      }
+  
+      // save the board if no duplicate is found
+      const saveResponse = await fetch('http://localhost:5000/boards', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(boardData),
+      });
+  
+      const savedBoard = await saveResponse.json();
+      console.log('Board saved:', savedBoard);
+  
+    } catch (error) {
+      console.error('Error saving board:', error);
+    }
+  };
+
   return (
     <DndProvider backend={HTML5Backend}>
       <div className="flex h-screen w-screen">
@@ -317,11 +324,22 @@ export default function Create() {
             ))}
           </div>
 
+          <div className="mt-4">
+            <TextField
+              label="Board Name"
+              variant="outlined"
+              fullWidth
+              value={boardName}
+              onChange={(e) => setBoardName(e.target.value)}
+              placeholder="Enter board name"
+            />
+          </div>
+
           <div className='flex items-end flex-1'>
             <JeopardyForm onSubmit={handleNewQuestion} />
           </div>
           {isGridFilled && (
-            <button className="play-button bg-blue-500 text-white p-4 rounded" onClick={handleSaveBoard}>
+            <button className="save-button bg-blue-500 text-white p-4 rounded mt-4" onClick={handleSaveBoard}>
               Save
             </button>
           )}

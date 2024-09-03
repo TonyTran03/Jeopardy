@@ -4,25 +4,44 @@ import { Link, useNavigate } from 'react-router-dom';
 
 export default function Home() {
   const [lobbyCode, setLobbyCode] = useState(generateLobbyCode());
+  const [sessionCode, setSessionCode] = useState(lobbyCode); 
   const [boards, setBoards] = useState([]);
   const [selectedBoard, setSelectedBoard] = useState(null);
+  const [teams, setTeams] = useState([]); 
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Fetch the available game boards from MongoDB
     fetch('http://localhost:5000/boards')
       .then((response) => response.json())
       .then((data) => setBoards(data))
       .catch((error) => console.error('Error fetching boards:', error));
   }, []);
 
-  const handleStartGame = () => {
+
+
+  const handleStartGame = async () => {
     if (selectedBoard) {
-      // Append the lobby code to the board's stored URL
-      const gameURL = `${selectedBoard.url}&lobbyCode=${lobbyCode}`;
-      navigate(gameURL);
+      try {
+        const sessionCreationResponse = await fetch('http://localhost:5000/sessions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ code: sessionCode }), // Send the session code
+        });
+  
+        if (sessionCreationResponse.ok) {
+          const gameURL = `/game?boardId=${selectedBoard._id}&lobbyCode=${sessionCode}`;
+          navigate(gameURL);
+        } else {
+          console.error('Failed to create session');
+        }
+      } catch (error) {
+        console.error('Error during session creation:', error);
+      }
     }
   };
+  
 
   function generateLobbyCode() {
     return Math.random().toString(36).substring(2, 8).toUpperCase();
@@ -58,6 +77,15 @@ export default function Home() {
       >
         Start Game
       </button>
+
+      <div>
+        <h2>Teams</h2>
+        <ul>
+          {teams.map((team, index) => (
+            <li key={index}>{team}</li>
+          ))}
+        </ul>
+      </div>
     </div>
   );
 }
