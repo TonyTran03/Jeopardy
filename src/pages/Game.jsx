@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import './game.css';
 import { Typography, Modal, Box } from '@mui/material';
@@ -13,13 +13,29 @@ export default function JeopardyGame() {
   const [rows, setRows] = useState(5);
   const [cols, setCols] = useState(5);
   const [columnNames, setColumnNames] = useState([]);
-  const [lobbyCode, setLobbyCode] = useState(''); // Add state for lobbyCode
+  const [lobbyCode, setLobbyCode] = useState('');
   const [questions, setQuestions] = useState([]); 
   const [selectedQuestion, setSelectedQuestion] = useState(null);
   const [selectedColumn, setSelectedColumn] = useState(null);
   const [open, setOpen] = useState(false);
+  const ws = useRef(null); // WebSocket reference
 
   useEffect(() => {
+    // Initialize WebSocket connection
+    ws.current = new WebSocket('ws://localhost:5000');
+
+    ws.current.onopen = () => {
+      console.log('Connected to WebSocket for Game');
+    };
+
+    ws.current.onmessage = (event) => {
+      const message = JSON.parse(event.data);
+      if (message.type === 'buzz') {
+        // Handle buzz received (you can implement logic here if needed)
+        console.log('Buzz received:', message);
+      }
+    };
+
     const fetchQuestions = async () => {
       try {
         const response = await fetch('http://localhost:5000/questions');
@@ -36,7 +52,7 @@ export default function JeopardyGame() {
     const rowsParam = query.get('rows');
     const colsParam = query.get('cols');
     const columnNamesParam = query.get('columnNames');
-    const lobbyCodeParam = query.get('lobbyCode'); // Get the lobbyCode
+    const lobbyCodeParam = query.get('lobbyCode');
 
     if (rowsParam) setRows(parseInt(rowsParam, 10));
     if (colsParam) setCols(parseInt(colsParam, 10));
@@ -47,9 +63,13 @@ export default function JeopardyGame() {
       setColumnNames(columnNamesParam.split(',').map(name => decodeURIComponent(name)));
     }
     if (lobbyCodeParam) {
-      setLobbyCode(lobbyCodeParam); // Set the lobbyCode state
+      setLobbyCode(lobbyCodeParam);
     }
-  }, []);  // Empty dependency array to only run on mount
+
+    return () => {
+      ws.current.close(); // Close WebSocket on component unmount
+    };
+  }, []);
 
   const calculatePoints = (rowIndex) => {
     return 200 * (rowIndex + 1);
@@ -74,9 +94,33 @@ export default function JeopardyGame() {
     setSelectedColumn(null);
   };
 
+  const activateBuzzers = async () => {
+    try {
+      // Make a POST request to your new /activate endpoint
+      const response = await fetch(`http://localhost:5000/sessions/${lobbyCode}/activate`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+  
+      if (response.ok) {
+        console.log('Buzzers activated');
+        if (ws.current && ws.current.readyState === WebSocket.OPEN) {
+          ws.current.send(JSON.stringify({ type: 'activate_buzzers', lobbyCode }));
+        }
+      } else {
+        console.error('Failed to activate buzzers');
+      }
+    } catch (error) {
+      console.error('Error activating buzzers:', error);
+    }
+  };
   return (
     <div className="flex flex-col h-screen w-screen justify-center items-center">
       <h1>Jeopardy Game</h1>
+
+
 
       {/* Gameboard */}
       <div 
@@ -91,8 +135,11 @@ export default function JeopardyGame() {
         {columnNames.map((name, colIndex) => (
           <div key={`col-name-${colIndex}`} className="jeopardy-cells column-names">
             {name || `Column ${colIndex + 1}`}
+          
+          
           </div>
         ))}
+        
 
         {/* Jeopardy Grid */}
         {Array.from({ length: rows * cols }).map((_, index) => {
@@ -121,6 +168,7 @@ export default function JeopardyGame() {
         aria-labelledby="question-title"
         aria-describedby="question-text"
       >
+        
         <Box
           sx={{
             position: 'absolute',
@@ -128,7 +176,7 @@ export default function JeopardyGame() {
             left: 0,
             width: '100vw',
             height: '100vh',
-            bgcolor: '#0a2f5c', // Dark blue background like Buzzinga
+            bgcolor: '#0a2f5c',
             color: 'white',
             display: 'flex',
             flexDirection: 'column',
@@ -141,29 +189,38 @@ export default function JeopardyGame() {
         >
           {selectedQuestion && (
             <>
-              {/* Column Name (Category) at the top */}
-              <Typography 
-                id="question-category" 
-                variant="h4" 
-                component="div" 
-                sx={{ 
-                  position: 'absolute', 
-                  top: '20px', 
-                  width: '100%', 
-                  textAlign: 'center',
-                  backgroundColor: 'black',
-                  fontSize: '64px'
-                }}
-              >
-                {selectedColumn || 'Category'}
-              </Typography>
 
-              {/* Question in the center */}
+            <div className='flex flex-col w-screen justify-center items-center'>
+                <Typography 
+                    id="question-category" 
+                    variant="h4" 
+                    component="div" 
+                    sx={{ 
+                      position: 'absolute', 
+                      top: '20px', 
+                      width: '100%', 
+                      textAlign: 'center',
+                      backgroundColor: 'black',
+                      fontSize: '64px'
+                    }}
+                  >
+                    {selectedColumn || 'Category'}
+
+                  </Typography>
+                  <button
+                      className="mt-4 p-2 bg-green-500 text-white rounded"
+                      onClick={activateBuzzers}
+                      style={{ marginBottom: '20px',  width: '50%'}}
+                    >
+                    Activate Buzzers
+                  </button>
+            </div>
+
+
               <Typography id="question-text" variant="h3" sx={{ mt: 6 }}>
                 {selectedQuestion.question}
               </Typography>
 
-              {/* Close button */}
               <button 
                 onClick={handleClose} 
                 className="close-button" 
@@ -171,7 +228,7 @@ export default function JeopardyGame() {
                   marginTop: '20px',
                   padding: '10px 20px',
                   fontSize: '1rem',
-                  backgroundColor: '#f1c40f', // Yellow button like Buzzinga
+                  backgroundColor: '#f1c40f',
                   border: 'none',
                   borderRadius: '5px',
                   color: '#333',

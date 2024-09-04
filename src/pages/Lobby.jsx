@@ -8,9 +8,29 @@ export default function Lobby() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    // Fetch session details and update teams periodically
+    const fetchSessionDetails = async () => {
+      try {
+        const response = await fetch(`http://localhost:5000/sessions/${sessionCode}`);
+        const data = await response.json();
+        setTeams(data.teams);
+        setGameStarted(data.gameStarted);
+      } catch (error) {
+        console.error('Error fetching session details:', error);
+      }
+    };
+
+    fetchSessionDetails(); // Initial fetch
+
+    const intervalId = setInterval(fetchSessionDetails, 5000); // Poll every 5 seconds
+
+    return () => clearInterval(intervalId); // Clean up on component unmount
+  }, [sessionCode]);
+
+  useEffect(() => {
     // Establish WebSocket connection
     const ws = new WebSocket('ws://localhost:5000');
-    
+
     ws.onopen = () => {
       ws.send(JSON.stringify({ type: 'join', sessionCode: sessionCode.toUpperCase() }));
     };
@@ -21,7 +41,7 @@ export default function Lobby() {
         setTeams(message.teams);
       } else if (message.type === 'start') {
         setGameStarted(true);
-        navigate(`/game/${sessionCode}`);
+        navigate(`/buzzer/${sessionCode}`);
       }
     };
 

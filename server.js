@@ -28,11 +28,10 @@ const wss = new WebSocketServer({ server });
 // Your WebSocket connection handler
 wss.on('connection', (ws) => {
   ws.on('message', (message) => {
-    console.log('Received message:', message);
     const parsedMessage = JSON.parse(message);
     if (parsedMessage.type === 'join') {
       const { sessionCode } = parsedMessage;
-      ws.sessionCode = sessionCode;
+      ws.sessionCode = sessionCode.toUpperCase(); // Ensure session code is uppercase
       console.log(`Client joined session: ${sessionCode}`);
     }
   });
@@ -253,4 +252,12 @@ app.post('/sessions/:code/start', (req, res) => {
   console.log(`Game started for session ${sessionCode}`);
   broadcastToSession(sessionCode, { type: 'start', message: 'Game started' });
   res.status(200).json({ message: 'Game started' });
+});
+
+
+// When buzzers are activated
+app.post('/sessions/:code/activate', (req, res) => {
+  const sessionCode = req.params.code.toUpperCase();
+  broadcastToSession(sessionCode, { type: 'activate_buzzers' });
+  res.status(200).json({ message: 'Buzzers activated' });
 });
