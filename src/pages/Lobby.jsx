@@ -47,11 +47,15 @@ export default function Lobby() {
 
     return () => ws.close(); // Clean up on component unmount
   }, [sessionCode, navigate]);
-
+  const teamName = sessionStorage.getItem('teamName');
+  const playerName = sessionStorage.getItem('playerName');
   return (
     <div>
       <h1>Lobby for Session {sessionCode}</h1>
       <h2>Teams</h2>
+
+      <h1>Welcome, {playerName}</h1>
+      <h2>Your team: {teamName}</h2>
       <ul>
         {teams.map((team, teamIndex) => (
           <li key={teamIndex}>

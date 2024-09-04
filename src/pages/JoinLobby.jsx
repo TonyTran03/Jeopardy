@@ -21,8 +21,11 @@ export default function JoinLobby() {
       if (response.ok) {
         const data = await response.json();
         setTeams(data.teams);  // Update teams in state
+        sessionStorage.setItem('teamName', teamName);
+        sessionStorage.setItem('playerName', playerName);
         console.log(`Joined session ${sessionCode} as part of team ${teamName}`);
         navigate(`/lobby/${sessionCode}`);
+
       } else {
         console.error('Failed to join session');
       }
