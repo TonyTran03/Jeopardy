@@ -3,49 +3,48 @@ import { useParams, useNavigate } from 'react-router-dom';
 
 export default function Lobby() {
   const { sessionCode } = useParams();
-  const [players, setPlayers] = useState([]);
+  const [teams, setTeams] = useState([]);
   const [gameStarted, setGameStarted] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchSessionDetails = async () => {
-      try {
-        const response = await fetch(`http://localhost:5000/sessions/${sessionCode}`);
-        const data = await response.json();
-        setPlayers(data.players);
-        setGameStarted(data.gameStarted);
-      } catch (error) {
-        console.error('Error fetching session details:', error);
+    // Establish WebSocket connection
+    const ws = new WebSocket('ws://localhost:5000');
+    
+    ws.onopen = () => {
+      ws.send(JSON.stringify({ type: 'join', sessionCode: sessionCode.toUpperCase() }));
+    };
+
+    ws.onmessage = (event) => {
+      const message = JSON.parse(event.data);
+      if (message.type === 'update') {
+        setTeams(message.teams);
+      } else if (message.type === 'start') {
+        setGameStarted(true);
+        navigate(`/game/${sessionCode}`);
       }
     };
 
-    fetchSessionDetails();
-  }, [sessionCode]);
-
-  const handleStartGame = async () => {
-    try {
-      const response = await fetch(`http://localhost:5000/sessions/${sessionCode}/start`, {
-        method: 'POST',
-      });
-      const data = await response.json();
-      console.log(data.message);
-      setGameStarted(true);
-      navigate(`/game/${sessionCode}`);
-    } catch (error) {
-      console.error('Error starting game:', error);
-    }
-  };
+    return () => ws.close(); // Clean up on component unmount
+  }, [sessionCode, navigate]);
 
   return (
     <div>
       <h1>Lobby for Session {sessionCode}</h1>
+      <h2>Teams</h2>
       <ul>
-        {players.map((player, index) => (
-          <li key={index}>{player}</li>
+        {teams.map((team, teamIndex) => (
+          <li key={teamIndex}>
+            <strong>Team: {team.name}</strong>
+            <ul>
+              {team.players.map((player, playerIndex) => (
+                <li key={playerIndex}>{player}</li>
+              ))}
+            </ul>
+          </li>
         ))}
       </ul>
-      {!gameStarted && <button onClick={handleStartGame}>Start Game</button>}
-      {gameStarted && <p>Game has started!</p>}
+      {gameStarted && <p>Game has started! Redirecting...</p>}
     </div>
   );
 }

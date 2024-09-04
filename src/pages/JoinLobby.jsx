@@ -3,8 +3,9 @@ import { useNavigate } from 'react-router-dom';
 
 export default function JoinLobby() {
   const [sessionCode, setSessionCode] = useState('');
-  const [playerName, setPlayerName] = useState('');
-  const [players, setPlayers] = useState([]);
+  const [teamName, setTeamName] = useState('');  // Team name input
+  const [playerName, setPlayerName] = useState('');  // Player name input
+  const [teams, setTeams] = useState([]);  // Store teams
   const navigate = useNavigate();
 
   const handleJoinSession = async () => {
@@ -14,12 +15,17 @@ export default function JoinLobby() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ playerName }),
+        body: JSON.stringify({ teamName, playerName }),  // Send both team and player name
       });
-      const data = await response.json();
-      setPlayers(data.players);
-      console.log('Joined session:', sessionCode);
-      navigate(`/lobby/${sessionCode}`);
+
+      if (response.ok) {
+        const data = await response.json();
+        setTeams(data.teams);  // Update teams in state
+        console.log(`Joined session ${sessionCode} as part of team ${teamName}`);
+        navigate(`/lobby/${sessionCode}`);
+      } else {
+        console.error('Failed to join session');
+      }
     } catch (error) {
       console.error('Error joining session:', error);
     }
@@ -35,16 +41,33 @@ export default function JoinLobby() {
       />
       <input
         type="text"
+        placeholder="Enter Your Team Name"
+        value={teamName}
+        onChange={(e) => setTeamName(e.target.value)}
+      />
+      <input
+        type="text"
         placeholder="Enter Your Name"
         value={playerName}
         onChange={(e) => setPlayerName(e.target.value)}
       />
       <button onClick={handleJoinSession}>Join Game</button>
-      <ul>
-        {players.map((player, index) => (
-          <li key={index}>{player}</li>
-        ))}
-      </ul>
+
+      <div>
+        <h3>Teams in Session:</h3>
+        <ul>
+          {teams.map((team, index) => (
+            <li key={index}>
+              <strong>{team.name}</strong>
+              <ul>
+                {team.players.map((player, idx) => (
+                  <li key={idx}>{player}</li>
+                ))}
+              </ul>
+            </li>
+          ))}
+        </ul>
+      </div>
     </div>
   );
 }
