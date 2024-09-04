@@ -23,6 +23,9 @@ useEffect(() => {
         setBuzzersActive(true); 
         console.log('Buzzers activated');
       }
+      else if ("deactivate_buzzers"){
+        setBuzzersActive(false); 
+      }
     };
   
     return () => {

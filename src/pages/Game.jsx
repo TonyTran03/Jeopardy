@@ -18,6 +18,11 @@ export default function JeopardyGame() {
   const [selectedQuestion, setSelectedQuestion] = useState(null);
   const [selectedColumn, setSelectedColumn] = useState(null);
   const [open, setOpen] = useState(false);
+
+  //makes the activate button show up or not if somebody is buzzed in
+  const [buzzedIn, setBuzzedIn] = useState(false);
+
+
   const ws = useRef(null); // WebSocket reference
 
   useEffect(() => {
@@ -88,15 +93,34 @@ export default function JeopardyGame() {
     }
   };
 
-  const handleClose = () => {
+   const handleClose = async () => {
     setOpen(false);
     setSelectedQuestion(null);
     setSelectedColumn(null);
+    setBuzzedIn(false); 
+  // Deactivate buzzers
+  try {
+    const response = await fetch(`http://localhost:5000/sessions/${lobbyCode}/deactivate`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (response.ok) {
+      console.log('Buzzers deactivated');
+    } else {
+      console.error('Failed to deactivate buzzers');
+    }
+  } catch (error) {
+    console.error('Error deactivating buzzers:', error);
+  }
+    
   };
 
   const activateBuzzers = async () => {
     try {
-      // Make a POST request to your new /activate endpoint
+      // turns buzzer on
       const response = await fetch(`http://localhost:5000/sessions/${lobbyCode}/activate`, {
         method: 'POST',
         headers: {
@@ -106,6 +130,7 @@ export default function JeopardyGame() {
   
       if (response.ok) {
         console.log('Buzzers activated');
+        setBuzzedIn(true);
         if (ws.current && ws.current.readyState === WebSocket.OPEN) {
           ws.current.send(JSON.stringify({ type: 'activate_buzzers', lobbyCode }));
         }
@@ -207,6 +232,8 @@ export default function JeopardyGame() {
                     {selectedColumn || 'Category'}
 
                   </Typography>
+
+                  {!buzzedIn &&
                   <button
                       className="mt-4 p-2 bg-green-500 text-white rounded"
                       onClick={activateBuzzers}
@@ -214,6 +241,8 @@ export default function JeopardyGame() {
                     >
                     Activate Buzzers
                   </button>
+
+                    }
             </div>
 
 

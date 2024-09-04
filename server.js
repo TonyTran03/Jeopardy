@@ -261,3 +261,9 @@ app.post('/sessions/:code/activate', (req, res) => {
   broadcastToSession(sessionCode, { type: 'activate_buzzers' });
   res.status(200).json({ message: 'Buzzers activated' });
 });
+// When buzzers are deactivated
+app.post('/sessions/:code/deactivate', (req, res) => {
+  const sessionCode = req.params.code.toUpperCase();
+  broadcastToSession(sessionCode, { type: 'deactivate_buzzers' });
+  res.status(200).json({ message: 'Buzzers deactivated' });
+});
