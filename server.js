@@ -34,6 +34,12 @@ wss.on('connection', (ws) => {
       ws.sessionCode = sessionCode.toUpperCase(); // Ensure session code is uppercase
       console.log(`Client joined session: ${sessionCode}`);
     }
+    else if(parsedMessage.type === 'buzz'){
+      const { teamName, playerName, sessionCode } = parsedMessage;
+      ws.sessionCode = sessionCode.toUpperCase();
+      broadcastToSession(ws.sessionCode, {teamaName, playerName});
+      res.status(200).json({ message: `team name = ${teamName}, player name = ${playerName}` });
+    }
   });
 });
 

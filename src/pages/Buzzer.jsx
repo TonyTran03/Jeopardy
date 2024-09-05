@@ -5,7 +5,8 @@ export default function Buzzer() {
   const { sessionCode } = useParams();
   const [buzzersActive, setBuzzersActive] = useState(false); // State to track buzzer activation
   const ws = useRef(null);
-
+  const teamName = sessionStorage.getItem('teamName');
+  const playerName = sessionStorage.getItem('playerName');
 // In Buzzer.jsx
 useEffect(() => {
     ws.current = new WebSocket('ws://localhost:5000');
@@ -35,7 +36,7 @@ useEffect(() => {
 
   const sendBuzz = () => {
     if (buzzersActive && ws.current && ws.current.readyState === WebSocket.OPEN) {
-      ws.current.send(JSON.stringify({ type: 'buzz', sessionCode }));
+      ws.current.send(JSON.stringify({ type: 'buzz', sessionCode,teamName, playerName }));
       console.log('Buzz sent!');
     } else {
       console.error('Buzzers are not active or WebSocket is not open');
