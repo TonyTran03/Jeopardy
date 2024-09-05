@@ -15,7 +15,9 @@ useEffect(() => {
       console.log('Connected to WebSocket for buzzer');
       ws.current.send(JSON.stringify({ type: 'join', sessionCode: sessionCode.toUpperCase() })); // Ensure this sends the correct sessionCode
     };
-  
+
+
+    //the servder is only going towards this websocket server
     ws.current.onmessage = (event) => {
       const message = JSON.parse(event.data);
       console.log('Message received from server:', message); // Log received messages
@@ -24,8 +26,11 @@ useEffect(() => {
         setBuzzersActive(true); 
         console.log('Buzzers activated');
       }
-      else if ("deactivate_buzzers"){
+      else if (message.type  === "deactivate_buzzers"){
         setBuzzersActive(false); 
+      }
+      else{
+        console.log("Ooops it's going to the wrong component")
       }
     };
   

@@ -37,8 +37,7 @@ wss.on('connection', (ws) => {
     else if(parsedMessage.type === 'buzz'){
       const { teamName, playerName, sessionCode } = parsedMessage;
       ws.sessionCode = sessionCode.toUpperCase();
-      broadcastToSession(ws.sessionCode, {teamaName, playerName});
-      res.status(200).json({ message: `team name = ${teamName}, player name = ${playerName}` });
+      broadcastToSession(ws.sessionCode, {type: 'buzzer', teamName, playerName});
     }
   });
 });

@@ -23,8 +23,7 @@ export default function JeopardyGame() {
   const [buzzedIn, setBuzzedIn] = useState(false);
 
 
-  const ws = useRef(null); // WebSocket reference
-
+  const ws = useRef(null); 
   useEffect(() => {
     // Initialize WebSocket connection
     ws.current = new WebSocket('ws://localhost:5000');
@@ -35,9 +34,9 @@ export default function JeopardyGame() {
 
     ws.current.onmessage = (event) => {
       const message = JSON.parse(event.data);
-      if (message.type === 'buzz') {
-        // Handle buzz received (you can implement logic here if needed)
-        console.log('Buzz received:', message);
+      if (message.type === 'buzzer'){
+
+        console.log("hi");
       }
     };
 
@@ -98,7 +97,7 @@ export default function JeopardyGame() {
     setSelectedQuestion(null);
     setSelectedColumn(null);
     setBuzzedIn(false); 
-  // Deactivate buzzers
+  
   try {
     const response = await fetch(`http://localhost:5000/sessions/${lobbyCode}/deactivate`, {
       method: 'POST',
@@ -192,6 +191,7 @@ export default function JeopardyGame() {
         onClose={handleClose}
         aria-labelledby="question-title"
         aria-describedby="question-text"
+       
       >
         
         <Box
