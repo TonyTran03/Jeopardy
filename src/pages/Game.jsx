@@ -18,7 +18,7 @@
     const [selectedQuestion, setSelectedQuestion] = useState(null);
     const [selectedColumn, setSelectedColumn] = useState(null);
     const [open, setOpen] = useState(false);
-
+    const [showButton, setShowButton]= useState(true);
     //makes the activate button show up or not if somebody is buzzed in
     const [buzzedIn, setBuzzedIn] = useState(false);
     const gridParam = query.get('grid');
@@ -26,6 +26,10 @@
     const colsParam = query.get('cols');
     const columnNamesParam = query.get('columnNames');
     const lobbyCodeParam = query.get('lobbyCode');
+
+
+    const [buzzTeam, setBuzzTeam] = useState('');
+    const [buzzPlayer, setBuzzPlayer]= useState('');
 
     const ws = useRef(null); 
     useEffect(() => {
@@ -72,7 +76,10 @@
         ws.current.onmessage = (event) => {
           const message = JSON.parse(event.data);
           if (message.type === 'buzzer') {
-            console.log("Buzz received in Game component");
+            setBuzzPlayer(message.playerName)
+            setBuzzTeam(message.teamName)
+            console.log(`Buzz received in Game component ${message.playerName} from ${message.teamName}`);
+            setBuzzedIn(true);
           }
         };
     
@@ -104,7 +111,9 @@
       setSelectedQuestion(null);
       setSelectedColumn(null);
       setBuzzedIn(false); 
-    
+      setBuzzPlayer('')
+      setBuzzTeam('')
+      setShowButton(true);
     try {
       const response = await fetch(`http://localhost:5000/sessions/${lobbyCodeParam}/deactivate`, {
         method: 'POST',
@@ -136,7 +145,7 @@
     
         if (response.ok) {
           console.log('Buzzers activated');
-          setBuzzedIn(true);
+          setShowButton(false);
           if (ws.current && ws.current.readyState === WebSocket.OPEN) {
             ws.current.send(JSON.stringify({ type: 'activate_buzzers', lobbyCodeParam }));
           }
@@ -240,7 +249,7 @@
 
                     </Typography>
 
-                    {!buzzedIn &&
+                    {showButton &&
                     <button
                         className="mt-4 p-2 bg-green-500 text-white rounded"
                         onClick={activateBuzzers}
@@ -249,6 +258,11 @@
                       Activate Buzzers
                     </button>
 
+                      }
+
+                      
+                      {buzzedIn &&
+                      `${buzzPlayer} from Team ${buzzTeam} has buzzed in!`
                       }
               </div>
 
