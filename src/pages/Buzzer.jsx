@@ -7,7 +7,7 @@ export default function Buzzer() {
   const ws = useRef(null);
   const teamName = sessionStorage.getItem('teamName');
   const playerName = sessionStorage.getItem('playerName');
-// In Buzzer.jsx
+
 useEffect(() => {
     ws.current = new WebSocket('ws://localhost:5000');
   

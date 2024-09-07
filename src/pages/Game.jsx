@@ -63,7 +63,8 @@
     
         ws.current.onopen = () => {
           console.log('Connected to WebSocket for Game');
-          
+          ws.current.send(JSON.stringify({ type: 'join', sessionCode: lobbyCodeParam.toUpperCase() })); // Ensure this sends the correct sessionCode
+
           // Send the 'join' message once the connection is open and lobbyCode is available
           console.log('Joined session with lobbyCode:', lobbyCodeParam);
         };
