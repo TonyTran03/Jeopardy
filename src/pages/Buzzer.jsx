@@ -13,6 +13,8 @@ useEffect(() => {
   
     ws.current.onopen = () => {
       console.log('Connected to WebSocket for buzzer');
+      console.log('Broadcasting to client with sessionCode:', sessionCode);
+
       ws.current.send(JSON.stringify({ type: 'join', sessionCode: sessionCode.toUpperCase() })); // Ensure this sends the correct sessionCode
     };
 
@@ -29,7 +31,7 @@ useEffect(() => {
       else if (message.type  === "deactivate_buzzers"){
         setBuzzersActive(false); 
       }
-      else{
+      else if(message.type  === "buzzer"){
         console.log("Ooops it's going to the wrong component")
       }
     };

@@ -5,7 +5,7 @@ import JeopardyGame from './pages/Game';
 import JoinLobby from './pages/JoinLobby';
 import Lobby from './pages/Lobby'; 
 import Buzzer from "./pages/Buzzer";
-
+import { WebSocket } from "ws";
 function App() {
 
   return (
