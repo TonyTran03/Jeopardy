@@ -1,12 +1,12 @@
-import express from 'express';
-import { MongoClient, ObjectId } from 'mongodb';
-import dotenv from 'dotenv';
-import cors from 'cors';
-import { WebSocketServer } from 'ws';
-import http from 'http';
+import express from "express";
+import { MongoClient, ObjectId } from "mongodb";
+import dotenv from "dotenv";
+import cors from "cors";
+import { WebSocketServer } from "ws";
+import http from "http";
 
-dotenv.config(); 
-const apiPrefix = process.env.NODE_ENV === 'production' ? '/api' : '';
+dotenv.config();
+const apiPrefix = process.env.NODE_ENV === "production" ? "/api" : "";
 const app = express();
 const port = process.env.PORT || 5000;
 
@@ -26,18 +26,21 @@ const server = http.createServer(app);
 const wss = new WebSocketServer({ server });
 
 // WebSocket connection handler
-wss.on('connection', (ws) => {
-  ws.on('message', (message) => {
+wss.on("connection", (ws) => {
+  ws.on("message", (message) => {
     const parsedMessage = JSON.parse(message);
-    if (parsedMessage.type === 'join') {
+    if (parsedMessage.type === "join") {
       const { sessionCode } = parsedMessage;
-      ws.sessionCode = sessionCode.toUpperCase(); 
+      ws.sessionCode = sessionCode.toUpperCase();
       console.log(`Client joined session: ${sessionCode}`);
-    }
-    else if(parsedMessage.type === 'buzz'){
+    } else if (parsedMessage.type === "buzz") {
       const { teamName, playerName, sessionCode } = parsedMessage;
       ws.sessionCode = sessionCode.toUpperCase();
-      broadcastToSession(ws.sessionCode, {type: 'buzzer', teamName, playerName});
+      broadcastToSession(ws.sessionCode, {
+        type: "buzzer",
+        teamName,
+        playerName,
+      });
     }
   });
 });
@@ -53,7 +56,10 @@ function broadcastToSession(sessionCode, message) {
 
 async function connectToMongoDB() {
   try {
-    client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
+    client = new MongoClient(uri, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
     await client.connect();
     console.log("Connected to MongoDB");
 
@@ -65,7 +71,6 @@ async function connectToMongoDB() {
     server.listen(port, () => {
       console.log(`Server running on port ${port}`);
     });
-
   } catch (err) {
     console.error("Failed to connect to MongoDB", err);
     process.exit(1);
@@ -79,14 +84,14 @@ connectToMongoDB();
 app.get(`${apiPrefix}/questions`, async (req, res) => {
   try {
     if (!collection) {
-      throw new Error('Database collection not initialized');
+      throw new Error("Database collection not initialized");
     }
 
     const questions = await collection.find({}).toArray();
     res.json(questions);
   } catch (err) {
-    console.error('Error fetching questions:', err);
-    res.status(500).send('Internal Server Error');
+    console.error("Error fetching questions:", err);
+    res.status(500).send("Internal Server Error");
   }
 });
 
@@ -94,70 +99,74 @@ app.get(`${apiPrefix}/questions`, async (req, res) => {
 app.post(`${apiPrefix}/questions`, async (req, res) => {
   try {
     if (!collection) {
-      throw new Error('Database collection not initialized');
+      throw new Error("Database collection not initialized");
     }
 
     const newQuestion = req.body;
     const result = await collection.insertOne(newQuestion);
 
-    const createdQuestion = await collection.findOne({ _id: result.insertedId });
+    const createdQuestion = await collection.findOne({
+      _id: result.insertedId,
+    });
     res.status(201).json(createdQuestion);
   } catch (err) {
-    console.error('Error creating question:', err);
-    res.status(500).send('Internal Server Error');
+    console.error("Error creating question:", err);
+    res.status(500).send("Internal Server Error");
   }
 });
 
 // GET /boards - Retrieve all boards
-app.get('/boards', async (req, res) => {
+app.get("/boards", async (req, res) => {
   try {
     if (!boardsCollection) {
-      throw new Error('Boards collection not initialized');
+      throw new Error("Boards collection not initialized");
     }
 
     const boards = await boardsCollection.find({}).toArray();
     res.json(boards);
   } catch (err) {
-    console.error('Error fetching boards:', err);
-    res.status(500).send('Internal Server Error');
+    console.error("Error fetching boards:", err);
+    res.status(500).send("Internal Server Error");
   }
 });
 
 // POST /boards - Save a new board
-app.post('/boards', async (req, res) => {
+app.post("/boards", async (req, res) => {
   try {
     if (!boardsCollection) {
-      throw new Error('Boards collection not initialized');
+      throw new Error("Boards collection not initialized");
     }
 
     const newBoard = req.body;
     const result = await boardsCollection.insertOne(newBoard);
 
-    const createdBoard = await boardsCollection.findOne({ _id: result.insertedId });
+    const createdBoard = await boardsCollection.findOne({
+      _id: result.insertedId,
+    });
     res.status(201).json(createdBoard);
   } catch (err) {
-    console.error('Error saving board:', err);
-    res.status(500).send('Internal Server Error');
+    console.error("Error saving board:", err);
+    res.status(500).send("Internal Server Error");
   }
 });
 
 // GET /boards/:id - Retrieve a specific board by ID
-app.get('/boards/:id', async (req, res) => {
+app.get("/boards/:id", async (req, res) => {
   try {
     const boardId = new ObjectId(req.params.id);
     const board = await boardsCollection.findOne({ _id: boardId });
     if (!board) {
-      return res.status(404).send('Board not found');
+      return res.status(404).send("Board not found");
     }
     res.json(board);
   } catch (err) {
-    console.error('Error fetching board:', err);
-    res.status(500).send('Internal Server Error');
+    console.error("Error fetching board:", err);
+    res.status(500).send("Internal Server Error");
   }
 });
 
 // Create a new session
-app.post('/sessions', (req, res) => {
+app.post("/sessions", (req, res) => {
   const sessionCode = Math.random().toString(36).substring(2, 8).toUpperCase();
   const newSession = {
     sessionCode,
@@ -173,28 +182,28 @@ app.post('/sessions', (req, res) => {
 });
 
 // Get session details
-app.get('/sessions/:code', (req, res) => {
+app.get("/sessions/:code", (req, res) => {
   const sessionCode = req.params.code.toUpperCase();
 
   if (!sessions[sessionCode]) {
-    return res.status(404).json({ message: 'Session not found' });
+    return res.status(404).json({ message: "Session not found" });
   }
 
   res.status(200).json(sessions[sessionCode]);
 });
 
 // Join a session
-app.post('/sessions/:code/join', (req, res) => {
+app.post("/sessions/:code/join", (req, res) => {
   const sessionCode = req.params.code.toUpperCase();
   let { teamName, playerName } = req.body;
 
   if (!sessions[sessionCode]) {
-    return res.status(404).json({ message: 'Session not found' });
+    return res.status(404).json({ message: "Session not found" });
   }
 
   teamName = teamName.toUpperCase();
 
-  let team = sessions[sessionCode].teams.find(team => team.name === teamName);
+  let team = sessions[sessionCode].teams.find((team) => team.name === teamName);
   if (!team) {
     team = { name: teamName, players: [], score: 0 };
     sessions[sessionCode].teams.push(team);
@@ -204,40 +213,57 @@ app.post('/sessions/:code/join', (req, res) => {
     team.players.push(playerName);
   }
 
-  console.log(`${playerName} joined team ${teamName} in session ${sessionCode}`);
-  broadcastToSession(sessionCode, { type: 'update', teams: sessions[sessionCode].teams });
+  console.log(
+    `${playerName} joined team ${teamName} in session ${sessionCode}`
+  );
+  broadcastToSession(sessionCode, {
+    type: "update",
+    teams: sessions[sessionCode].teams,
+  });
   res.status(200).json({ teams: sessions[sessionCode].teams });
 });
 
 // Update score
-app.post('/sessions/:code/score', (req, res) => {
+app.post("/sessions/:code/score", (req, res) => {
   const sessionCode = req.params.code.toUpperCase();
-  const { teamName, points } = req.body;
+  const { teamName, points, correct } = req.body;
 
   if (!sessions[sessionCode]) {
-    return res.status(404).json({ message: 'Session not found' });
+    return res.status(404).json({ message: "Session not found" });
   }
 
-  const team = sessions[sessionCode].teams.find(team => team.name === teamName.toUpperCase());
+  const team = sessions[sessionCode].teams.find(
+    (team) => team.name === teamName.toUpperCase()
+  );
   if (!team) {
-    return res.status(404).json({ message: 'Team not found' });
+    return res.status(404).json({ message: "Team not found" });
   }
 
-  team.score += points;
-  console.log(`Team ${teamName} now has ${team.score} points in session ${sessionCode}`);
-  broadcastToSession(sessionCode, { type: 'score_update', teams: sessions[sessionCode].teams });
+  // Conditionally update score based on whether the answer was correct
+  if (correct === 1) {
+    team.score += points; // Add points if correct
+  } else if (correct === 0) {
+    team.score -= points; // Optionally deduct points if incorrect (optional)
+  }
+  console.log(
+    `Team ${teamName} now has ${team.score} points in session ${sessionCode}`
+  );
+  broadcastToSession(sessionCode, {
+    type: "score_update",
+    teams: sessions[sessionCode].teams,
+  });
   res.status(200).json({ score: team.score });
 });
 
 // Display scores
-app.get('/sessions/:code/scores', (req, res) => {
+app.get("/sessions/:code/scores", (req, res) => {
   const sessionCode = req.params.code.toUpperCase();
 
   if (!sessions[sessionCode]) {
-    return res.status(404).json({ message: 'Session not found' });
+    return res.status(404).json({ message: "Session not found" });
   }
 
-  const scores = sessions[sessionCode].teams.map(team => ({
+  const scores = sessions[sessionCode].teams.map((team) => ({
     teamName: team.name,
     score: team.score,
   }));
@@ -246,29 +272,28 @@ app.get('/sessions/:code/scores', (req, res) => {
 });
 
 // Start the game
-app.post('/sessions/:code/start', (req, res) => {
+app.post("/sessions/:code/start", (req, res) => {
   const sessionCode = req.params.code.toUpperCase();
 
   if (!sessions[sessionCode]) {
-    return res.status(404).json({ message: 'Session not found' });
+    return res.status(404).json({ message: "Session not found" });
   }
 
   sessions[sessionCode].gameStarted = true;
   console.log(`Game started for session ${sessionCode}`);
-  broadcastToSession(sessionCode, { type: 'start', message: 'Game started' });
-  res.status(200).json({ message: 'Game started' });
+  broadcastToSession(sessionCode, { type: "start", message: "Game started" });
+  res.status(200).json({ message: "Game started" });
 });
-
 
 // When buzzers are activated
-app.post('/sessions/:code/activate', (req, res) => {
+app.post("/sessions/:code/activate", (req, res) => {
   const sessionCode = req.params.code.toUpperCase();
-  broadcastToSession(sessionCode, { type: 'activate_buzzers' });
-  res.status(200).json({ message: 'Buzzers activated' });
+  broadcastToSession(sessionCode, { type: "activate_buzzers" });
+  res.status(200).json({ message: "Buzzers activated" });
 });
 // When buzzers are deactivated
-app.post('/sessions/:code/deactivate', (req, res) => {
+app.post("/sessions/:code/deactivate", (req, res) => {
   const sessionCode = req.params.code.toUpperCase();
-  broadcastToSession(sessionCode, { type: 'deactivate_buzzers' });
-  res.status(200).json({ message: 'Buzzers deactivated' });
+  broadcastToSession(sessionCode, { type: "deactivate_buzzers" });
+  res.status(200).json({ message: "Buzzers deactivated" });
 });

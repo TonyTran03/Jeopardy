@@ -202,10 +202,39 @@ export default function JeopardyGame() {
           body: JSON.stringify({
             teamName: buzzedTeam, // The team that buzzed in
             points: points, // The points for the question
+            correct: 1,
           }),
         }
       );
 
+      if (response.ok) {
+        const data = await response.json();
+        console.log(`Correct! Team now has ${data.score} points.`);
+      } else {
+        console.error("Failed to update the score");
+      }
+    } catch (error) {
+      console.error("Error updating the score:", error);
+    }
+  };
+
+  //buzzTeam should have the team who buzzed at this moment, so we can use this variable again
+  const handleIncorect = async (points, buzzedTeam) => {
+    try {
+      const response = await fetch(
+        `http://localhost:5000/sessions/${lobbyCodeParam}/score`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            teamName: buzzedTeam, // The team that buzzed in
+            points: points, // The points for the question
+            correct: 0,
+          }),
+        }
+      );
       if (response.ok) {
         const data = await response.json();
         console.log(`Correct! Team now has ${data.score} points.`);
@@ -349,7 +378,14 @@ export default function JeopardyGame() {
                   >
                     Correct
                   </button>
-                  <button className="incorrectButton">Incorrect</button>
+                  <button
+                    className="incorrectButton"
+                    onClick={() =>
+                      handleIncorect(selectedQuestion.points, buzzTeam)
+                    }
+                  >
+                    Incorrect
+                  </button>
                 </h1>
               )}
             </>
