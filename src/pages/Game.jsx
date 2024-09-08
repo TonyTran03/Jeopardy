@@ -73,13 +73,30 @@
           console.log('Joined session with lobbyCode:', lobbyCodeParam);
         };
     
-        ws.current.onmessage = (event) => {
+        ws.current.onmessage = async (event) => {
           const message = JSON.parse(event.data);
           if (message.type === 'buzzer') {
             setBuzzPlayer(message.playerName)
             setBuzzTeam(message.teamName)
             console.log(`Buzz received in Game component ${message.playerName} from ${message.teamName}`);
             setBuzzedIn(true);
+
+            try {
+              const response = await fetch(`http://localhost:5000/sessions/${lobbyCodeParam}/deactivate`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+              });
+        
+              if (response.ok) {
+                console.log('Buzzers deactivated');
+              } else {
+                console.error('Failed to deactivate buzzers');
+              }
+            } catch (error) {
+              console.error('Error deactivating buzzers:', error);
+            }
           }
         };
     
@@ -93,14 +110,15 @@
       return 200 * (rowIndex + 1);
     };
 
-    const handleOpen = (index) => {
+    const handleOpen = (index, points) => {
+
       const questionId = grid[index];
       const question = questions.find(q => q._id === questionId);
       const colIndex = index % cols;
       const columnName = columnNames[colIndex];
 
       if (question) {
-        setSelectedQuestion(question);
+        setSelectedQuestion({ ...question, points }); 
         setSelectedColumn(columnName);
         setOpen(true);
       }
@@ -156,6 +174,33 @@
         console.error('Error activating buzzers:', error);
       }
     };
+
+    const handleCorrect = async (points, buzzedTeam) => {
+      console.log(lobbyCodeParam); // Check if lobbyCodeParam is valid
+
+      try {
+        const response = await fetch(`http://localhost:5000/sessions/${lobbyCodeParam}/score`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            teamName: buzzedTeam,  // The team that buzzed in
+            points: points,      // The points for the question
+          }),
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          console.log(`Correct! Team now has ${data.score} points.`);
+        } else {
+          console.error('Failed to update the score');
+        }
+      } catch (error) {
+        console.error('Error updating the score:', error);
+      }
+    };
+
     return (
       <div className="flex flex-col h-screen w-screen justify-center items-center">
         <h1>Jeopardy Game</h1>
@@ -190,7 +235,7 @@
               <div 
                 key={index} 
                 className="jeopardy-cells"
-                onClick={() => handleOpen(index)}
+                onClick={() => handleOpen(index, points)} // Pass the points to handleOpen
                 style={{ cursor: 'pointer' }}
               >
                 <Typography variant='h2'>
@@ -262,8 +307,13 @@
 
                       
                       {buzzedIn &&
-                      `${buzzPlayer} from Team ${buzzTeam} has buzzed in!`
+                      <h1 className='flex flex-col'>
+                        {buzzPlayer} from Team ${buzzTeam} has buzzed in!
+                      </h1>
+                      
+
                       }
+
               </div>
 
 
@@ -287,6 +337,23 @@
                 >
                   Close
                 </button>
+
+
+                {buzzedIn &&
+                      <h1 className='flex mt-6'>
+                    
+                        <button
+                         className="correctButton"
+                         onClick={() => handleCorrect(selectedQuestion.points, buzzTeam)}
+                         >
+                        Correct
+                      </button>
+                      <button  className="incorrectButton">
+                        Incorrect
+                      </button>
+                      </h1>
+
+                      }
               </>
             )}
           </Box>

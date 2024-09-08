@@ -5,7 +5,7 @@ import cors from 'cors';
 import { WebSocketServer } from 'ws';
 import http from 'http';
 
-dotenv.config(); // Load environment variables
+dotenv.config(); 
 const apiPrefix = process.env.NODE_ENV === 'production' ? '/api' : '';
 const app = express();
 const port = process.env.PORT || 5000;
@@ -25,13 +25,13 @@ app.use(express.json());
 const server = http.createServer(app);
 const wss = new WebSocketServer({ server });
 
-// Your WebSocket connection handler
+// WebSocket connection handler
 wss.on('connection', (ws) => {
   ws.on('message', (message) => {
     const parsedMessage = JSON.parse(message);
     if (parsedMessage.type === 'join') {
       const { sessionCode } = parsedMessage;
-      ws.sessionCode = sessionCode.toUpperCase(); // Ensure session code is uppercase
+      ws.sessionCode = sessionCode.toUpperCase(); 
       console.log(`Client joined session: ${sessionCode}`);
     }
     else if(parsedMessage.type === 'buzz'){

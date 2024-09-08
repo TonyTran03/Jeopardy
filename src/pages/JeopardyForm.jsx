@@ -70,7 +70,7 @@ export default function JeopardyForm({ onSubmit }) {
                   type="text"
                   value={questionText}
                   onChange={(e) => setQuestionText(e.target.value)}
-                  className="text-black bg-gray-200 border border-gray-400 focus:outline-none focus:border-blue-500"
+                  className=" bg-gray-200 border border-gray-400 focus:outline-none focus:border-blue-500"
                 />
               </div>
               <div>
@@ -79,7 +79,7 @@ export default function JeopardyForm({ onSubmit }) {
                   type="text"
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
-                  className="text-black bg-gray-200 border border-gray-400 focus:outline-none focus:border-blue-500"
+                  className=" bg-gray-200 border border-gray-400 focus:outline-none focus:border-blue-500"
                 />
               </div>
               <div>
@@ -88,7 +88,7 @@ export default function JeopardyForm({ onSubmit }) {
                   type="text"
                   value={answerText}
                   onChange={(e) => setAnswerText(e.target.value)}
-                  className="text-black bg-gray-200 border border-gray-400 focus:outline-none focus:border-blue-500"
+                  className=" bg-gray-200 border border-gray-400 focus:outline-none focus:border-blue-500"
                 />
               </div>
               <div>
@@ -96,7 +96,7 @@ export default function JeopardyForm({ onSubmit }) {
                 <input
                   type="file"
                   onChange={handleImageUpload}
-                  className="text-black bg-gray-200 border border-gray-400 focus:outline-none focus:border-blue-500"
+                  className=" bg-gray-200 border border-gray-400 focus:outline-none focus:border-blue-500"
                 />
               </div>
               <DialogActions>

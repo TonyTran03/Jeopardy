@@ -98,16 +98,17 @@ export default function Home() {
       <h2>Select a Game Board</h2>
       <select
         value={selectedBoard?._id || ''}
+        style={{ color: 'white' }}
         onChange={(e) =>
           setSelectedBoard(boards.find((board) => board._id === e.target.value))
         }
-        className="p-2 border border-gray-300 rounded"
+        className="p-2 border border-gray-300 rounded  bg-gray-800"
       >
-        <option value="" disabled>
+        <option value="" disabled style={{ color: 'white' }}>
           Select a board
         </option>
         {boards.map((board) => (
-          <option key={board._id} value={board._id}>
+          <option key={board._id} value={board._id} style={{ color: 'white' }}>
             {board.name}
           </option>
         ))}

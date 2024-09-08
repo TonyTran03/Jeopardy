@@ -52,7 +52,6 @@ function DroppableCell({ index, question, onDrop, points }) {
 
   const isActive = canDrop && isOver;
   let backgroundColor = 'transparent';
-  let textColor = 'black';
 
   if (question) {
     backgroundColor = '#FFDDC1'; // Light orange background when a question is placed
@@ -69,7 +68,7 @@ function DroppableCell({ index, question, onDrop, points }) {
       className="jeopardy-cell"
       style={{
         backgroundColor,
-        color: textColor,
+       
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'center',

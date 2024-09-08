@@ -36,3 +36,32 @@ body {
     text-align: center;
   }
   
+
+
+  .correctButton {
+    background-color: #28a745; /* Green */
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-right: 10px;
+  }
+  
+  .correctButton:hover {
+    background-color: #218838;
+  }
+  
+  .incorrectButton {
+    background-color: #dc3545; /* Red */
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .incorrectButton:hover {
+    background-color: #c82333;
+  }
+  

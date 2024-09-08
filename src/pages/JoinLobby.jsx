@@ -40,18 +40,21 @@ export default function JoinLobby() {
         type="text"
         placeholder="Enter Session Code"
         value={sessionCode}
+        style={{ color: 'white' }}
         onChange={(e) => setSessionCode(e.target.value)}
       />
       <input
         type="text"
         placeholder="Enter Your Team Name"
         value={teamName}
+        style={{ color: 'white' }}
         onChange={(e) => setTeamName(e.target.value)}
       />
       <input
         type="text"
         placeholder="Enter Your Name"
         value={playerName}
+        style={{ color: 'white' }}
         onChange={(e) => setPlayerName(e.target.value)}
       />
       <button onClick={handleJoinSession}>Join Game</button>
