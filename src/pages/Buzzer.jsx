@@ -9,6 +9,23 @@ export default function Buzzer() {
   const playerName = sessionStorage.getItem('playerName');
   const [scores, setScores] = useState([]);
 useEffect(() => {
+
+  const fetchTeamScores = async () => {
+    try {
+      const response = await fetch(`http://localhost:5000/sessions/${sessionCode}/scores`);
+
+      if (response.ok) {
+        const data = await response.json();
+        setScores(data.scores);
+        
+      } else {
+        console.error('Error fetching questions:', error);
+      }
+    } catch (error) {
+      console.error('Error fetching points:', error);
+    }
+  };
+  fetchTeamScores()
     ws.current = new WebSocket('ws://localhost:5000');
   
     ws.current.onopen = () => {
@@ -35,20 +52,7 @@ useEffect(() => {
         console.log("Ooops it's going to the wrong component")
       }
       else if(message.type ==='score_update'){
-        const fetchTeamScores = async () => {
-          try {
-            const response = await fetch(`http://localhost:5000/sessions/${sessionCode}/scores`);
-    
-            if (response.ok) {
-              const data = await response.json();
-              setScores(data.scores);
-            } else {
-              console.error('Error fetching questions:', error);
-            }
-          } catch (error) {
-            console.error('Error fetching points:', error);
-          }
-        };
+
     
         fetchTeamScores();
     
@@ -75,7 +79,7 @@ useEffect(() => {
     <>
     <div className='flex justify-start'>
 
-      {scores.length > 0 ? (
+      
         <ul>
           {scores.map((team) => (
             <li key={team.teamName}>
@@ -83,9 +87,7 @@ useEffect(() => {
             </li>
           ))}
         </ul>
-      ) : (
-        <p>No scores available</p>
-      )}
+      
     </div>
       <div className=" aboslute h-screen flex flex-col justify-center items-center">
       <h1>Ready to Buzz?</h1>
