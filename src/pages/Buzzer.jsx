@@ -7,7 +7,7 @@ export default function Buzzer() {
   const ws = useRef(null);
   const teamName = sessionStorage.getItem('teamName');
   const playerName = sessionStorage.getItem('playerName');
-
+  
 useEffect(() => {
     ws.current = new WebSocket('ws://localhost:5000');
   
@@ -41,6 +41,34 @@ useEffect(() => {
     };
   }, [sessionCode]);
 
+
+  const [scores, setScores] = useState([]);
+  useEffect(() => {
+    // Create a function to fetch the team scores
+    const fetchTeamScores = async () => {
+      try {
+        const response = await fetch(`http://localhost:5000/sessions/${sessionCode}/scores`);
+
+        if (response.ok) {
+          const data = await response.json();
+          setScores(data.scores);
+        } else {
+          console.error('Error fetching questions:', error);
+        }
+      } catch (error) {
+        console.error('Error fetching points:', error);
+      }
+    };
+    // Fetch the scores
+    fetchTeamScores();
+
+    const interval = setInterval(fetchTeamScores, 5000); 
+
+    // Clean up the interval on component unmount
+    return () => clearInterval(interval);
+  }, [sessionCode]); 
+
+
   const sendBuzz = () => {
     if (buzzersActive && ws.current && ws.current.readyState === WebSocket.OPEN) {
       ws.current.send(JSON.stringify({ type: 'buzz', sessionCode,teamName, playerName }));
@@ -51,7 +79,22 @@ useEffect(() => {
   };
 
   return (
-    <div className="h-screen flex flex-col justify-center items-center">
+    <>
+    <div className='flex justify-start'>
+
+      {scores.length > 0 ? (
+        <ul>
+          {scores.map((team) => (
+            <li key={team.teamName}>
+              {team.teamName}: {team.score}
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p>No scores available</p>
+      )}
+    </div>
+      <div className=" aboslute h-screen flex flex-col justify-center items-center">
       <h1>Ready to Buzz?</h1>
       <button
         className="mt-4 p-4 bg-red-500 text-white rounded-full"
@@ -60,6 +103,8 @@ useEffect(() => {
       >
         BUZZ
       </button>
-    </div>
+    </div>  
+    </>
+
   );
 }
