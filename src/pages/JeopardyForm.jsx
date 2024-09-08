@@ -4,15 +4,18 @@ import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
+
 export default function JeopardyForm({ onSubmit }) {
   const [open, setOpen] = useState(false);
   const [questionText, setQuestionText] = useState("");
   const [category, setCategory] = useState("");
   const [answerText, setAnswerText] = useState("");
   const [answerImageBase64, setAnswerImageBase64] = useState("");
+  const [questionImageBase64, setQuestionImageBase64] = useState(""); // Add state for question image
   const [points, setPoints] = useState(100);
 
-  const handleImageUpload = (event) => {
+  // Handle image upload for answer
+  const handleAnswerImageUpload = (event) => {
     const file = event.target.files[0];
     const reader = new FileReader();
 
@@ -25,15 +28,32 @@ export default function JeopardyForm({ onSubmit }) {
     }
   };
 
+  // Handle image upload for question
+  const handleQuestionImageUpload = (event) => {
+    const file = event.target.files[0];
+    const reader = new FileReader();
+
+    reader.onloadend = () => {
+      setQuestionImageBase64(reader.result);
+    };
+
+    if (file) {
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleSubmit = (event) => {
     event.preventDefault();
 
     const newQuestion = {
-      question: questionText,
+      question: {
+        text: questionText,
+        image: questionImageBase64, // Store the base64 image string for the question
+      },
       category: category,
       answer: {
         text: answerText,
-        image: answerImageBase64, // Store the base64 image string
+        image: answerImageBase64, // Store the base64 image string for the answer
       },
       points: points,
     };
@@ -44,6 +64,7 @@ export default function JeopardyForm({ onSubmit }) {
     setCategory("");
     setAnswerText("");
     setAnswerImageBase64("");
+    setQuestionImageBase64(""); // Reset question image state
     setOpen(false); // Close the dialog after submission
   };
 
@@ -74,6 +95,14 @@ export default function JeopardyForm({ onSubmit }) {
               />
             </div>
             <div>
+              <label>Question (Image):</label>
+              <input
+                type="file"
+                onChange={handleQuestionImageUpload}
+                className=" bg-gray-200 border border-gray-400 focus:outline-none focus:border-blue-500"
+              />
+            </div>
+            <div>
               <label>Category:</label>
               <input
                 type="text"
@@ -95,7 +124,7 @@ export default function JeopardyForm({ onSubmit }) {
               <label>Answer (Image):</label>
               <input
                 type="file"
-                onChange={handleImageUpload}
+                onChange={handleAnswerImageUpload}
                 className=" bg-gray-200 border border-gray-400 focus:outline-none focus:border-blue-500"
               />
             </div>

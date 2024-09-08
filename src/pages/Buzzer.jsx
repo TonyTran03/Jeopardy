@@ -76,24 +76,51 @@ export default function Buzzer() {
 
   return (
     <>
-      <div className="flex justify-start">
-        <ul>
-          {scores.map((team) => (
-            <li key={team.teamName}>
-              {team.teamName}: {team.score}
-            </li>
-          ))}
-        </ul>
-      </div>
-      <div className=" aboslute h-screen flex flex-col justify-center items-center">
-        <h1>Ready to Buzz?</h1>
-        <button
-          className="mt-4 p-4 bg-red-500 text-white rounded-full"
-          onClick={sendBuzz}
-          disabled={!buzzersActive}
-        >
-          BUZZ
-        </button>
+      <div className="flex flex-col w-screen justify-start p-6 bg-blue-900 text-white min-h-screen">
+        {/* Display Player and Team Info */}
+        <div className="text-left mb-8">
+          <h2 className="text-xl font-bold mb-2">Welcome, {playerName}!</h2>
+          <p className="text-lg font-semibold">
+            You’re representing:{" "}
+            <span className="text-yellow-400">{teamName}</span>
+          </p>
+        </div>
+
+        {/* Display Scores in Descending Order */}
+        <div className="text-left mb-8">
+          <h2 className="text-lg font-semibold">Current Scores</h2>
+          <ul className="list-none mt-4 space-y-2">
+            {scores
+              .sort((a, b) => b.score - a.score) // Sort teams by score in descending order
+              .map((team) => (
+                <li
+                  key={team.teamName}
+                  className="flex justify-between items-center bg-blue-800 p-4 rounded-lg shadow-md"
+                >
+                  <span className="text-lg font-bold">{team.teamName}</span>
+                  <span className="text-xl font-extrabold">{team.score}</span>
+                </li>
+              ))}
+          </ul>
+        </div>
+
+        {/* Centered Buzzer Section */}
+        <div className="flex flex-col justify-center items-center w-full h-full">
+          <h1 className="text-2xl font-semibold mb-6">
+            Ready to Buzz, {playerName}?
+          </h1>
+          <button
+            className={`mt-4 py-6 px-12 rounded-full text-2xl font-bold shadow-lg transition-transform transform hover:scale-110 ${
+              buzzersActive
+                ? "bg-red-500 text-white hover:bg-red-600 cursor-pointer"
+                : "bg-gray-400 text-gray-800 cursor-not-allowed"
+            }`}
+            onClick={sendBuzz}
+            disabled={!buzzersActive}
+          >
+            BUZZ
+          </button>
+        </div>
       </div>
     </>
   );

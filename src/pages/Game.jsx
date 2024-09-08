@@ -28,6 +28,7 @@ export default function JeopardyGame() {
 
   const [buzzTeam, setBuzzTeam] = useState("");
   const [buzzPlayer, setBuzzPlayer] = useState("");
+  const [showAnswer, setShowAnswer] = useState(false);
 
   const ws = useRef(null);
   useEffect(() => {
@@ -138,6 +139,7 @@ export default function JeopardyGame() {
     setBuzzPlayer("");
     setBuzzTeam("");
     setShowButton(true);
+    setShowAnswer(false);
     try {
       const response = await fetch(
         `http://localhost:5000/sessions/${lobbyCodeParam}/deactivate`,
@@ -210,6 +212,7 @@ export default function JeopardyGame() {
       if (response.ok) {
         const data = await response.json();
         console.log(`Correct! Team now has ${data.score} points.`);
+        setShowAnswer(true); // Show the answer after clicking "Correct"
       } else {
         console.error("Failed to update the score");
       }
@@ -312,7 +315,7 @@ export default function JeopardyGame() {
             outline: "none",
           }}
         >
-          {selectedQuestion && (
+          {selectedQuestion && selectedQuestion.question && (
             <>
               <div className="flex flex-col w-screen justify-center items-center p-6 bg-blue-900 min-h-screen">
                 <Typography
@@ -359,7 +362,9 @@ export default function JeopardyGame() {
                     textAlign: "center",
                   }}
                 >
-                  {selectedQuestion.question || "Awaiting Question"}
+                  {typeof selectedQuestion.question === "string"
+                    ? selectedQuestion.question
+                    : JSON.stringify(selectedQuestion.question)}
                 </Typography>
 
                 <button
@@ -387,6 +392,42 @@ export default function JeopardyGame() {
                     >
                       Incorrect
                     </button>
+                  </div>
+                )}
+
+                {/* Display answer after clicking Correct */}
+                {showAnswer && (
+                  <div>
+                    {/* Display the answer text if available */}
+                    {selectedQuestion.answer?.text && (
+                      <Typography
+                        id="answer-text"
+                        variant="h4"
+                        sx={{
+                          mt: 6,
+                          fontSize: "36px",
+                          color: "yellow",
+                          textAlign: "center",
+                        }}
+                      >
+                        Answer: {selectedQuestion.answer.text}
+                      </Typography>
+                    )}
+
+                    {/* Display the answer image if available */}
+                    {selectedQuestion.answer?.image && (
+                      <div className="flex justify-center mt-4">
+                        <img
+                          src={selectedQuestion.answer.image}
+                          alt="Answer"
+                          style={{
+                            maxWidth: "100%",
+                            maxHeight: "300px",
+                            borderRadius: "8px",
+                          }}
+                        />
+                      </div>
+                    )}
                   </div>
                 )}
               </div>

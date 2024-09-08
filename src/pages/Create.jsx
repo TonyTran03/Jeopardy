@@ -52,7 +52,7 @@ function DroppableCell({ index, question, onDrop, points }) {
 
   const isActive = canDrop && isOver;
   let backgroundColor = "transparent";
-
+  let textColor = "#000000";
   if (question) {
     backgroundColor = "#FFDDC1"; // Light orange background when a question is placed
     textColor = "darkslategray";

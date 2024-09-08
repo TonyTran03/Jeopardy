@@ -1,58 +1,107 @@
 :root {
   --lightblue: #a8cbd1;
-  --vanilla: #e1d7a2;
+  --vanilla: #f5f5f5; /* Updated vanilla to a softer shade */
   --coralpink: #e88e83;
   --bittersweetshimmer: #be534b;
   --tiffany: #8ee0c9;
+  --primary-dark: #2c3e50;
+  --primary-light: #ecf0f1;
+  --primary-accent: #2980b9;
+  --secondary-accent: #e74c3c;
 }
+
+body {
+  font-family: "Roboto", sans-serif;
+  background-color: var(
+    --vanilla
+  ); /* Softer vanilla for a more modern, cleaner look */
+  margin: 0;
+  padding: 0;
+}
+
 .qSection {
   background-color: var(--tiffany);
+  color: var(--primary-dark);
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+  transition: background-color 0.3s ease;
 }
+
+.qSection:hover {
+  background-color: var(--lightblue); /* Hover state for interactivity */
+}
+
 .container {
   display: grid;
   grid-template-columns: repeat(var(--cols), 1fr);
   grid-template-rows: repeat(var(--rows), 1fr);
-  gap: 3px;
-  height: 100%; /* Ensure the grid takes up the full height of its container */
-  width: 100%; /* Ensure the grid takes up the full width of its container */
+  gap: 10px; /* Wider gap for a more open look */
+  padding: 20px;
+  height: 100%;
+  width: 100%;
 }
 
 .jeopardy-cell {
   padding: 20px;
   text-align: center;
-  border: 1px solid #000;
+  border-radius: 8px; /* Modern rounded corners */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Softer shadow for a modern look */
   display: flex;
   justify-content: center;
   align-items: center;
-  flex-direction: column;
-  height: 100%;
-  width: 100%;
+  background-color: var(--lightblue);
+  color: var(--primary-dark);
+  font-weight: bold;
+  transition: all 0.3s ease; /* Smooth transitions */
 }
 
-body {
-  background-color: var(
-    --vanilla
-  ); /* Replace with your desired background color */
+.jeopardy-cell:hover {
+  transform: translateY(-5px); /* Lift the cell slightly on hover */
+  background-color: var(--coralpink); /* Interactive hover effect */
+  color: white;
 }
+
 .add-row,
 .add-col {
   margin-top: 10px;
   padding: 10px 20px;
-  background-color: #007bff;
+  background-color: var(--primary-accent);
+  color: white;
+  border: none;
+  border-radius: 8px; /* Softer button style */
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 1rem;
+}
+
+.add-row:hover,
+.add-col:hover {
+  background-color: var(--primary-dark);
+}
+
+.column-name-input {
+  text-align: center;
+  padding: 10px;
+  border: 1px solid #ddd;
+  background-color: var(--lightblue);
+  color: var(--primary-dark);
+  font-weight: bold;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.save-button {
+  transition: all 0.3s ease;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 1rem;
+  background-color: var(--secondary-accent);
   color: white;
   border: none;
   cursor: pointer;
 }
 
-.add-row:hover,
-.add-col:hover {
-  background-color: #0056b3;
-}
-.column-name-input {
-  text-align: center;
-  padding: 10px;
-  border: 1px solid #000;
-  background-color: var(--lightblue);
-  color: white;
-  font-weight: bold;
+.save-button:hover {
+  transform: translateY(-3px);
+  background-color: #c0392b; /* Darker red for hover */
 }
