@@ -98,6 +98,9 @@
               console.error('Error deactivating buzzers:', error);
             }
           }
+
+
+
         };
     
         return () => {
@@ -196,6 +199,9 @@
         } else {
           console.error('Failed to update the score');
         }
+      
+      
+      
       } catch (error) {
         console.error('Error updating the score:', error);
       }

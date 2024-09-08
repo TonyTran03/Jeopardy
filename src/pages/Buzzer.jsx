@@ -7,7 +7,7 @@ export default function Buzzer() {
   const ws = useRef(null);
   const teamName = sessionStorage.getItem('teamName');
   const playerName = sessionStorage.getItem('playerName');
-  
+  const [scores, setScores] = useState([]);
 useEffect(() => {
     ws.current = new WebSocket('ws://localhost:5000');
   
@@ -34,6 +34,25 @@ useEffect(() => {
       else if(message.type  === "buzzer"){
         console.log("Ooops it's going to the wrong component")
       }
+      else if(message.type ==='score_update'){
+        const fetchTeamScores = async () => {
+          try {
+            const response = await fetch(`http://localhost:5000/sessions/${sessionCode}/scores`);
+    
+            if (response.ok) {
+              const data = await response.json();
+              setScores(data.scores);
+            } else {
+              console.error('Error fetching questions:', error);
+            }
+          } catch (error) {
+            console.error('Error fetching points:', error);
+          }
+        };
+    
+        fetchTeamScores();
+    
+      }
     };
   
     return () => {
@@ -41,32 +60,6 @@ useEffect(() => {
     };
   }, [sessionCode]);
 
-
-  const [scores, setScores] = useState([]);
-  useEffect(() => {
-    // Create a function to fetch the team scores
-    const fetchTeamScores = async () => {
-      try {
-        const response = await fetch(`http://localhost:5000/sessions/${sessionCode}/scores`);
-
-        if (response.ok) {
-          const data = await response.json();
-          setScores(data.scores);
-        } else {
-          console.error('Error fetching questions:', error);
-        }
-      } catch (error) {
-        console.error('Error fetching points:', error);
-      }
-    };
-    // Fetch the scores
-    fetchTeamScores();
-
-    const interval = setInterval(fetchTeamScores, 5000); 
-
-    // Clean up the interval on component unmount
-    return () => clearInterval(interval);
-  }, [sessionCode]); 
 
 
   const sendBuzz = () => {
