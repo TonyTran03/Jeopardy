@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 
 export default function Lobby() {
   const { sessionCode } = useParams();
@@ -11,12 +11,14 @@ export default function Lobby() {
     // Fetch session details and update teams periodically
     const fetchSessionDetails = async () => {
       try {
-        const response = await fetch(`http://localhost:5000/sessions/${sessionCode}`);
+        const response = await fetch(
+          `http://localhost:5000/sessions/${sessionCode}`
+        );
         const data = await response.json();
         setTeams(data.teams);
         setGameStarted(data.gameStarted);
       } catch (error) {
-        console.error('Error fetching session details:', error);
+        console.error("Error fetching session details:", error);
       }
     };
 
@@ -29,17 +31,19 @@ export default function Lobby() {
 
   useEffect(() => {
     // Establish WebSocket connection
-    const ws = new WebSocket('ws://localhost:5000');
+    const ws = new WebSocket("ws://localhost:5000");
 
     ws.onopen = () => {
-      ws.send(JSON.stringify({ type: 'join', sessionCode: sessionCode.toUpperCase() }));
+      ws.send(
+        JSON.stringify({ type: "join", sessionCode: sessionCode.toUpperCase() })
+      );
     };
 
     ws.onmessage = (event) => {
       const message = JSON.parse(event.data);
-      if (message.type === 'update') {
+      if (message.type === "update") {
         setTeams(message.teams);
-      } else if (message.type === 'start') {
+      } else if (message.type === "start") {
         setGameStarted(true);
         navigate(`/buzzer/${sessionCode}`);
       }
@@ -47,8 +51,8 @@ export default function Lobby() {
 
     return () => ws.close(); // Clean up on component unmount
   }, [sessionCode, navigate]);
-  const teamName = sessionStorage.getItem('teamName');
-  const playerName = sessionStorage.getItem('playerName');
+  const teamName = sessionStorage.getItem("teamName");
+  const playerName = sessionStorage.getItem("playerName");
   return (
     <div>
       <h1>Lobby for Session {sessionCode}</h1>
