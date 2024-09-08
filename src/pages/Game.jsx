@@ -314,18 +314,20 @@ export default function JeopardyGame() {
         >
           {selectedQuestion && (
             <>
-              <div className="flex flex-col w-screen justify-center items-center">
+              <div className="flex flex-col w-screen justify-center items-center p-6 bg-blue-900 min-h-screen">
                 <Typography
                   id="question-category"
                   variant="h4"
                   component="div"
                   sx={{
                     position: "absolute",
-                    top: "20px",
+                    top: "0px",
                     width: "100%",
                     textAlign: "center",
                     backgroundColor: "black",
-                    fontSize: "64px",
+                    color: "white",
+                    fontSize: "48px",
+                    padding: "10px 0",
                   }}
                 >
                   {selectedColumn || "Category"}
@@ -333,61 +335,61 @@ export default function JeopardyGame() {
 
                 {showButton && (
                   <button
-                    className="mt-4 p-2 bg-green-500 text-white rounded"
+                    className="mt-4 p-4 bg-green-600 text-white font-semibold rounded shadow-lg hover:bg-green-700 transition-all"
                     onClick={activateBuzzers}
                     style={{ marginBottom: "20px", width: "50%" }}
                   >
                     Activate Buzzers
                   </button>
                 )}
+
                 {buzzedIn && (
-                  <h1 className="flex flex-col">
+                  <h1 className="mt-6 text-white text-lg">
                     {buzzPlayer} from Team {buzzTeam} has buzzed in!
                   </h1>
                 )}
+
+                <Typography
+                  id="question-text"
+                  variant="h3"
+                  sx={{
+                    mt: 10,
+                    fontSize: "40px",
+                    color: "white",
+                    textAlign: "center",
+                  }}
+                >
+                  {selectedQuestion.question || "Awaiting Question"}
+                </Typography>
+
+                <button
+                  onClick={handleClose}
+                  className="mt-10 py-2 px-6 bg-yellow-500 text-black font-semibold rounded shadow-lg hover:bg-yellow-600 transition-all"
+                >
+                  Close
+                </button>
+
+                {buzzedIn && (
+                  <div className="flex gap-4 mt-6">
+                    <button
+                      className="py-2 px-6 bg-green-500 text-white font-bold rounded-full hover:bg-green-600 transition-all"
+                      onClick={() =>
+                        handleCorrect(selectedQuestion.points, buzzTeam)
+                      }
+                    >
+                      Correct
+                    </button>
+                    <button
+                      className="py-2 px-6 bg-red-500 text-white font-bold rounded-full hover:bg-red-600 transition-all"
+                      onClick={() =>
+                        handleIncorect(selectedQuestion.points, buzzTeam)
+                      }
+                    >
+                      Incorrect
+                    </button>
+                  </div>
+                )}
               </div>
-
-              <Typography id="question-text" variant="h3" sx={{ mt: 6 }}>
-                {selectedQuestion.question}
-              </Typography>
-
-              <button
-                onClick={handleClose}
-                className="close-button"
-                style={{
-                  marginTop: "20px",
-                  padding: "10px 20px",
-                  fontSize: "1rem",
-                  backgroundColor: "#f1c40f",
-                  border: "none",
-                  borderRadius: "5px",
-                  color: "#333",
-                  cursor: "pointer",
-                }}
-              >
-                Close
-              </button>
-
-              {buzzedIn && (
-                <h1 className="flex mt-6">
-                  <button
-                    className="correctButton"
-                    onClick={() =>
-                      handleCorrect(selectedQuestion.points, buzzTeam)
-                    }
-                  >
-                    Correct
-                  </button>
-                  <button
-                    className="incorrectButton"
-                    onClick={() =>
-                      handleIncorect(selectedQuestion.points, buzzTeam)
-                    }
-                  >
-                    Incorrect
-                  </button>
-                </h1>
-              )}
             </>
           )}
         </Box>
