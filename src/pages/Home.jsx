@@ -112,7 +112,7 @@ export default function Home() {
         onChange={(e) =>
           setSelectedBoard(boards.find((board) => board._id === e.target.value))
         }
-        className="p-2 border border-gray-300 rounded  bg-gray-800"
+        className="p-2 border border-gray-300 rounded bg-gray-800"
       >
         <option value="" disabled style={{ color: "white" }}>
           Select a board
@@ -134,18 +134,18 @@ export default function Home() {
 
       <div>
         <h2>Teams</h2>
-        <ul>
+        <div className="teams-container flex space-x-8">
           {teams.map((team, index) => (
-            <li key={index}>
+            <div key={index} className="team-card bg-gray-800 p-4 rounded-lg">
               <strong>{team.name}</strong>
               <ul>
                 {team.players.map((player, idx) => (
                   <li key={idx}>{player}</li>
                 ))}
               </ul>
-            </li>
+            </div>
           ))}
-        </ul>
+        </div>
       </div>
     </div>
   );
