@@ -6,7 +6,8 @@ import { Typography, Modal, Box } from "@mui/material";
 function useQuery() {
   return new URLSearchParams(useLocation().search);
 }
-
+//TODO make the boxes disappear after quwestion is done
+// Extra: add a log 
 export default function JeopardyGame() {
   const query = useQuery();
   const [grid, setGrid] = useState([]);
@@ -30,6 +31,7 @@ export default function JeopardyGame() {
   const [buzzPlayer, setBuzzPlayer] = useState("");
   const [showAnswer, setShowAnswer] = useState(false);
 
+  const [asked, setAsked] = useState([]);
   const ws = useRef(null);
   useEffect(() => {
     if (rowsParam) setRows(parseInt(rowsParam, 10));
@@ -192,7 +194,7 @@ export default function JeopardyGame() {
 
   const handleCorrect = async (points, buzzedTeam) => {
     console.log(lobbyCodeParam); // Check if lobbyCodeParam is valid
-
+    setAsked(selectedQuestion.question)
     try {
       const response = await fetch(
         `http://localhost:5000/sessions/${lobbyCodeParam}/score`,
@@ -223,6 +225,8 @@ export default function JeopardyGame() {
 
   //buzzTeam should have the team who buzzed at this moment, so we can use this variable again
   const handleIncorect = async (points, buzzedTeam) => {
+    setAsked(selectedQuestion.question)
+    console.log(`Ive placed the ${selectedQuestion.question} into `)
     try {
       const response = await fetch(
         `http://localhost:5000/sessions/${lobbyCodeParam}/score`,
@@ -379,7 +383,7 @@ export default function JeopardyGame() {
                     <button
                       className="py-2 px-6 bg-green-500 text-white font-bold rounded-full hover:bg-green-600 transition-all"
                       onClick={() =>
-                        handleCorrect(selectedQuestion.points, buzzTeam)
+                        handleCorrect(selectedQuestion.points, buzzTeam, rowIndex)
                       }
                     >
                       Correct
